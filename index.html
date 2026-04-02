@@ -1,10 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Website</title>
+  <title>Whelen HS3200 Siren</title>
+
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #00ffcc;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #00ffcc;
+    }
+
+    .panel {
+      margin-top: 40px;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 15px;
+      padding: 20px 40px;
+      font-size: 18px;
+      background: black;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #00ffcc;
+      color: black;
+      transform: scale(1.1);
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Welcome to my website 🔥</h1>
-  <p>This is hosted for FREE on GitHub.</p>
+
+<h1>🚓 Whelen HS3200 Siren Panel</h1>
+
+<div class="panel">
+  <button class="btn" onclick="playLoop('wail')">WAIL</button>
+  <button class="btn" onclick="playLoop('yelp')">YELP</button>
+  <button class="btn" onclick="playLoop('phaser')">PHASER</button>
+  <button class="btn" onclick="playLoop('priority')">PRIORITY</button>
+  <button class="btn" onclick="stopAll()">STOP</button>
+</div>
+
+<audio id="wail" src="sounds/wail.mp3" loop></audio>
+<audio id="yelp" src="sounds/yelp.mp3" loop></audio>
+<audio id="phaser" src="sounds/phaser.mp3" loop></audio>
+<audio id="priority" src="sounds/priority.mp3" loop></audio>
+
+<script>
+let sounds = ["wail", "yelp", "phaser", "priority"];
+
+function stopAll() {
+  sounds.forEach(id => {
+    let s = document.getElementById(id);
+    s.pause();
+    s.currentTime = 0;
+  });
+}
+
+function playLoop(id) {
+  stopAll();
+  let sound = document.getElementById(id);
+  sound.play();
+}
+</script>
+
 </body>
 </html>
