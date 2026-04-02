@@ -1,173 +1,406 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Siren Mobile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Siren App</title>
 
   <style>
-    body {
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
       margin: 0;
-      background: #0a0a0a;
-      color: #00ffcc;
-      font-family: Arial;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    .lights {
-      position: fixed;
-      top: 0;
-      width: 50%;
+      padding: 0;
       height: 100%;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .red { left: 0; background: rgba(255,0,0,0.25); }
-    .blue { right: 0; background: rgba(0,100,255,0.25); }
-
-    .active {
-      animation: flash 0.3s infinite alternate;
-    }
-
-    @keyframes flash {
-      from { opacity: 0.2; }
-      to { opacity: 0.6; }
-    }
-
-    h1 {
-      margin: 10px;
-      font-size: 22px;
-    }
-
-    .panel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      padding: 15px;
-    }
-
-    .btn {
-      padding: 25px;
-      font-size: 18px;
-      border-radius: 15px;
-      border: 2px solid #00ffcc;
-      background: black;
-      color: #00ffcc;
-      touch-action: manipulation;
-    }
-
-    .horn { border-color: red; color: red; }
-    .manual { border-color: yellow; color: yellow; }
-
-    .stop {
-      grid-column: span 2;
-      border-color: white;
+      background: #07090c;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
       color: white;
     }
 
-    .status {
-      margin: 10px;
+    body {
+      position: relative;
+    }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 0;
+    }
+
+    .flash.active {
+      opacity: 1;
+    }
+
+    .flash::before,
+    .flash::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      animation: strobe 0.3s infinite alternate;
+    }
+
+    .flash::before {
+      left: 0;
+      background: rgba(255, 0, 0, 0.20);
+    }
+
+    .flash::after {
+      right: 0;
+      background: rgba(0, 110, 255, 0.20);
+      animation-delay: 0.15s;
+    }
+
+    @keyframes strobe {
+      from { opacity: 0.15; }
+      to { opacity: 0.55; }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      gap: 14px;
+      background:
+        radial-gradient(circle at top, rgba(0,255,204,0.08), transparent 35%),
+        linear-gradient(180deg, #0c1015 0%, #07090c 100%);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px 0;
+    }
+
+    .title {
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .sub {
+      color: #8b95a3;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .pill {
+      min-width: 110px;
+      text-align: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #0f141b;
+      border: 1px solid #233040;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #00ffcc;
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.4);
+    }
+
+    .display {
+      border-radius: 22px;
+      padding: 18px 16px;
+      background: linear-gradient(180deg, #111822, #0b1118);
+      border: 1px solid #1e2b39;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 12px 25px rgba(0,0,0,0.22);
+      text-align: center;
+    }
+
+    .mode {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #eafcff;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #8b95a3;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #131b24, #0b1118);
+      border: 1px solid #1e2b39;
+      color: #dffaf7;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 10px 20px rgba(0,0,0,0.22);
+      transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+      touch-action: manipulation;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn.active {
+      border-color: #00ffcc;
+      box-shadow:
+        0 0 0 2px rgba(0,255,204,0.15),
+        0 0 24px rgba(0,255,204,0.10),
+        inset 0 0 20px rgba(0,255,204,0.04);
+    }
+
+    .btn .small {
+      display: block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #8b95a3;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .manual {
+      color: #ffe36a;
+      border-color: #5d5324;
+    }
+
+    .manual.active {
+      border-color: #ffe36a;
+      box-shadow:
+        0 0 0 2px rgba(255,227,106,0.15),
+        0 0 24px rgba(255,227,106,0.10),
+        inset 0 0 20px rgba(255,227,106,0.04);
+    }
+
+    .horn {
+      color: #ff6a6a;
+      border-color: #5d2626;
+    }
+
+    .horn.active {
+      border-color: #ff6a6a;
+      box-shadow:
+        0 0 0 2px rgba(255,106,106,0.15),
+        0 0 24px rgba(255,106,106,0.12),
+        inset 0 0 20px rgba(255,106,106,0.04);
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stop {
+      height: 64px;
+      border-radius: 18px;
+      border: none;
+      background: linear-gradient(180deg, #1a2027, #10151b);
+      border: 1px solid #344250;
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      touch-action: manipulation;
+    }
+
+    .stop:active {
+      transform: scale(0.99);
     }
   </style>
 </head>
-
 <body>
+  <div id="flash" class="flash"></div>
 
-<div id="red" class="lights red"></div>
-<div id="blue" class="lights blue"></div>
+  <div class="app">
+    <div class="topbar">
+      <div>
+        <div class="title">🚓 Siren App</div>
+        <div class="sub">Mobile control panel</div>
+      </div>
+      <div class="pill" id="statusPill">STANDBY</div>
+    </div>
 
-<h1>🚓 Siren Control</h1>
+    <div class="display">
+      <div class="mode" id="modeText">STANDBY</div>
+      <div class="hint">Tap a tone or hold MANUAL / HORN</div>
+    </div>
 
-<div class="panel">
-  <button class="btn" onclick="play('wail')">WAIL</button>
-  <button class="btn" onclick="play('yelp')">YELP</button>
+    <div class="grid">
+      <button class="btn" id="btn-wail" onclick="playMode('wail')">
+        WAIL
+        <span class="small">LOOP</span>
+      </button>
 
-  <button class="btn" onclick="play('t3')">T3</button>
+      <button class="btn" id="btn-yelp" onclick="playMode('yelp')">
+        YELP
+        <span class="small">LOOP</span>
+      </button>
 
-  <button class="btn manual"
-    ontouchstart="startManual(event)"
-    ontouchend="stopManual()">
-    MANUAL
-  </button>
+      <button class="btn" id="btn-t3" onclick="playMode('t3')">
+        T3
+        <span class="small">LOOP</span>
+      </button>
 
-  <button class="btn horn"
-    ontouchstart="startHorn(event)"
-    ontouchend="stopHorn()">
-    HORN
-  </button>
+      <button class="btn manual" id="btn-manual"
+        ontouchstart="startManual(event)"
+        ontouchend="stopManual(event)"
+        ontouchcancel="stopManual(event)">
+        MANUAL
+        <span class="small">HOLD</span>
+      </button>
 
-  <button class="btn stop" onclick="stopAll()">STOP</button>
-</div>
+      <button class="btn horn" id="btn-horn"
+        ontouchstart="startHorn(event)"
+        ontouchend="stopHorn(event)"
+        ontouchcancel="stopHorn(event)">
+        HORN
+        <span class="small">HOLD</span>
+      </button>
+    </div>
 
-<div class="status" id="status">STANDBY</div>
+    <div class="bottom">
+      <button class="stop" onclick="stopAll()">STOP</button>
+    </div>
+  </div>
 
-<!-- Sounds -->
-<audio id="wail" src="sounds/wail.mp3" loop></audio>
-<audio id="yelp" src="sounds/yelp.mp3" loop></audio>
-<audio id="t3" src="sounds/t3.mp3" loop></audio>
-<audio id="manual" src="sounds/manual.mp3" loop></audio>
-<audio id="horn" src="sounds/horn.mp3" loop></audio>
+  <audio id="wail" src="sounds/wail.mp3" loop></audio>
+  <audio id="yelp" src="sounds/yelp.mp3" loop></audio>
+  <audio id="t3" src="sounds/t3.mp3" loop></audio>
+  <audio id="manual" src="sounds/manual.mp3" loop></audio>
+  <audio id="horn" src="sounds/horn.mp3" loop></audio>
 
-<script>
-let modes = ["wail","yelp","t3"];
-let status = document.getElementById("status");
-let red = document.getElementById("red");
-let blue = document.getElementById("blue");
+  <script>
+    const modeIds = ["wail", "yelp", "t3"];
+    const flash = document.getElementById("flash");
+    const modeText = document.getElementById("modeText");
+    const statusPill = document.getElementById("statusPill");
 
-function lights(on){
-  red.classList.toggle("active", on);
-  blue.classList.toggle("active", on);
-}
+    let currentMode = null;
 
-function setStatus(t){ status.innerText = t; }
+    function setText(text) {
+      modeText.textContent = text;
+      statusPill.textContent = text;
+    }
 
-function stopAll(){
-  modes.forEach(id=>{
-    let s=document.getElementById(id);
-    s.pause(); s.currentTime=0;
-  });
-  stopManual();
-  stopHorn();
-  lights(false);
-  setStatus("STANDBY");
-}
+    function setLights(on) {
+      flash.classList.toggle("active", on);
+    }
 
-function play(id){
-  stopAll();
-  document.getElementById(id).play();
-  lights(true);
-  setStatus(id.toUpperCase());
-}
+    function clearButtons() {
+      document.querySelectorAll(".btn").forEach(btn => btn.classList.remove("active"));
+    }
 
-// MANUAL
-function startManual(e){
-  e.preventDefault();
-  let m=document.getElementById("manual");
-  m.currentTime=0; m.play();
-  lights(true);
-  setStatus("MANUAL");
-}
-function stopManual(){
-  let m=document.getElementById("manual");
-  m.pause(); m.currentTime=0;
-}
+    function stopModesOnly() {
+      modeIds.forEach(id => {
+        const a = document.getElementById(id);
+        a.pause();
+        a.currentTime = 0;
+      });
+    }
 
-// HORN
-function startHorn(e){
-  e.preventDefault();
-  let h=document.getElementById("horn");
-  h.currentTime=0; h.play();
-  lights(true);
-  setStatus("HORN");
-}
-function stopHorn(){
-  let h=document.getElementById("horn");
-  h.pause(); h.currentTime=0;
-}
-</script>
+    function stopAll() {
+      stopModesOnly();
 
+      const manual = document.getElementById("manual");
+      const horn = document.getElementById("horn");
+
+      manual.pause();
+      manual.currentTime = 0;
+      horn.pause();
+      horn.currentTime = 0;
+
+      currentMode = null;
+      clearButtons();
+      setLights(false);
+      setText("STANDBY");
+    }
+
+    function playMode(id) {
+      stopAll();
+      currentMode = id;
+      document.getElementById(id).play();
+      document.getElementById("btn-" + id).classList.add("active");
+      setLights(true);
+      setText(id.toUpperCase());
+    }
+
+    function startManual(e) {
+      e.preventDefault();
+      const audio = document.getElementById("manual");
+      clearButtons();
+      document.getElementById("btn-manual").classList.add("active");
+      audio.currentTime = 0;
+      audio.play();
+      setLights(true);
+      setText("MANUAL");
+    }
+
+    function stopManual(e) {
+      if (e) e.preventDefault();
+      const audio = document.getElementById("manual");
+      audio.pause();
+      audio.currentTime = 0;
+
+      clearButtons();
+
+      if (currentMode) {
+        document.getElementById("btn-" + currentMode).classList.add("active");
+        setLights(true);
+        setText(currentMode.toUpperCase());
+      } else {
+        setLights(false);
+        setText("STANDBY");
+      }
+    }
+
+    function startHorn(e) {
+      e.preventDefault();
+      const audio = document.getElementById("horn");
+      clearButtons();
+      document.getElementById("btn-horn").classList.add("active");
+      audio.currentTime = 0;
+      audio.play();
+      setLights(true);
+      setText("HORN");
+    }
+
+    function stopHorn(e) {
+      if (e) e.preventDefault();
+      const audio = document.getElementById("horn");
+      audio.pause();
+      audio.currentTime = 0;
+
+      clearButtons();
+
+      if (currentMode) {
+        document.getElementById("btn-" + currentMode).classList.add("active");
+        setLights(true);
+        setText(currentMode.toUpperCase());
+      } else {
+        setLights(false);
+        setText("STANDBY");
+      }
+    }
+  </script>
 </body>
 </html>
