@@ -1,83 +1,112 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Siren Buttons</title>
+  <title>Whelen HS3200 Siren</title>
+
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #00ffcc;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .panel {
+      margin-top: 40px;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 15px;
+      padding: 20px 40px;
+      font-size: 18px;
+      background: black;
+      border: 2px solid #00ffcc;
+      border-radius: 10px;
+      color: #00ffcc;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #00ffcc;
+      color: black;
+      transform: scale(1.1);
+    }
+
+    .horn {
+      border-color: red;
+      color: red;
+    }
+
+    .horn:hover {
+      background: red;
+      color: black;
+    }
+  </style>
 </head>
 
-<body style="text-align:center; font-family:Arial; background:#111; color:white;">
+<body>
 
-<h1>Siren Control</h1>
+<h1>🚓 Whelen HS3200 Siren Panel</h1>
 
-<button onclick="playLoop('wail')">WAIL</button>
-<button onclick="playLoop('yelp')">YELP</button>
-<button onclick="playLoop('t3')">T3</button>
+<div class="panel">
+  <button class="btn" onclick="playLoop('wail')">WAIL</button>
+  <button class="btn" onclick="playLoop('yelp')">YELP</button>
+  <button class="btn" onclick="playLoop('phaser')">PHASER</button>
+  <button class="btn" onclick="playLoop('priority')">PRIORITY</button>
 
-<br><br>
+  <br>
 
-<button 
-  onmousedown="startManual()" 
-  onmouseup="stopManual()" 
-  onmouseleave="stopManual()"
-  ontouchstart="startManual()" 
-  ontouchend="stopManual()">
-  MANUAL (HOLD)
-</button>
+  <!-- HOLD AIRHORN -->
+  <button class="btn horn"
+    onmousedown="startHorn()"
+    onmouseup="stopHorn()"
+    onmouseleave="stopHorn()"
+    ontouchstart="startHorn()"
+    ontouchend="stopHorn()">
+    AIRHORN (HOLD)
+  </button>
 
-<button 
-  onmousedown="startHorn()" 
-  onmouseup="stopHorn()" 
-  onmouseleave="stopHorn()"
-  ontouchstart="startHorn()" 
-  ontouchend="stopHorn()">
-  HORN (HOLD)
-</button>
+  <br>
 
-<br><br>
+  <button class="btn" onclick="stopAll()">STOP</button>
+</div>
 
-<button onclick="stopAll()">STOP</button>
-
-<!-- Sounds -->
+<!-- Sirens -->
 <audio id="wail" src="sounds/wail.mp3" loop></audio>
 <audio id="yelp" src="sounds/yelp.mp3" loop></audio>
-<audio id="t3" src="sounds/t3.mp3" loop></audio>
-<audio id="manual" src="sounds/manual.mp3" loop></audio>
-<audio id="horn" src="sounds/horn.mp3" loop></audio>
+<audio id="phaser" src="sounds/phaser.mp3" loop></audio>
+<audio id="priority" src="sounds/priority.mp3" loop></audio>
+
+<!-- Airhorn -->
+<audio id="horn" src="sounds/airhorn.mp3" loop></audio>
 
 <script>
-let modes = ["wail","yelp","t3"];
-let manual = document.getElementById("manual");
+let sounds = ["wail", "yelp", "phaser", "priority"];
 let horn = document.getElementById("horn");
 
-// stop sirens
+// Stop all sirens
 function stopAll() {
-  modes.forEach(id => {
+  sounds.forEach(id => {
     let s = document.getElementById(id);
     s.pause();
     s.currentTime = 0;
   });
-  stopManual();
-  stopHorn();
 }
 
-// play loop siren
+// Play siren (loop)
 function playLoop(id) {
   stopAll();
-  let s = document.getElementById(id);
-  s.play();
+  let sound = document.getElementById(id);
+  sound.play();
 }
 
-// manual hold
-function startManual() {
-  manual.currentTime = 0;
-  manual.play();
-}
-
-function stopManual() {
-  manual.pause();
-  manual.currentTime = 0;
-}
-
-// horn hold
+// HOLD AIRHORN
 function startHorn() {
   horn.currentTime = 0;
   horn.play();
