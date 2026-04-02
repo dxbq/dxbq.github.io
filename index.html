@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Whelen HS3200 Siren</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Siren Mobile</title>
 
   <style>
     body {
@@ -10,239 +11,161 @@
       color: #00ffcc;
       font-family: Arial;
       text-align: center;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     .lights {
       position: fixed;
       top: 0;
-      left: 0;
       width: 50%;
       height: 100%;
-      background: rgba(255, 0, 0, 0.18);
-      pointer-events: none;
       opacity: 0;
+      pointer-events: none;
     }
 
-    .lights.right {
-      left: 50%;
-      background: rgba(0, 100, 255, 0.18);
-    }
+    .red { left: 0; background: rgba(255,0,0,0.25); }
+    .blue { right: 0; background: rgba(0,100,255,0.25); }
 
-    .lights.active {
-      animation: flash 0.35s infinite alternate;
+    .active {
+      animation: flash 0.3s infinite alternate;
     }
 
     @keyframes flash {
-      from { opacity: 0.15; }
-      to { opacity: 0.45; }
+      from { opacity: 0.2; }
+      to { opacity: 0.6; }
     }
 
     h1 {
-      margin-top: 20px;
-      position: relative;
-      z-index: 2;
+      margin: 10px;
+      font-size: 22px;
     }
 
     .panel {
-      margin-top: 40px;
-      position: relative;
-      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 15px;
     }
 
     .btn {
-      display: inline-block;
-      margin: 15px;
-      padding: 20px 40px;
+      padding: 25px;
       font-size: 18px;
-      background: black;
+      border-radius: 15px;
       border: 2px solid #00ffcc;
-      border-radius: 10px;
+      background: black;
       color: #00ffcc;
-      cursor: pointer;
-      transition: 0.2s;
+      touch-action: manipulation;
     }
 
-    .btn:hover {
-      background: #00ffcc;
-      color: black;
-      transform: scale(1.1);
-    }
+    .horn { border-color: red; color: red; }
+    .manual { border-color: yellow; color: yellow; }
 
-    .horn {
-      border-color: red;
-      color: red;
-    }
-
-    .horn:hover {
-      background: red;
-      color: black;
-    }
-
-    .manual {
-      border-color: yellow;
-      color: yellow;
-    }
-
-    .manual:hover {
-      background: yellow;
-      color: black;
+    .stop {
+      grid-column: span 2;
+      border-color: white;
+      color: white;
     }
 
     .status {
-      margin-top: 20px;
-      font-size: 22px;
+      margin: 10px;
+      font-size: 20px;
       font-weight: bold;
-      position: relative;
-      z-index: 2;
     }
   </style>
 </head>
 
 <body>
 
-<div id="redLight" class="lights"></div>
-<div id="blueLight" class="lights right"></div>
+<div id="red" class="lights red"></div>
+<div id="blue" class="lights blue"></div>
 
-<h1>🚓 Whelen HS3200 Siren Panel</h1>
+<h1>🚓 Siren Control</h1>
 
 <div class="panel">
-  <button class="btn" onclick="playLoop('wail')">WAIL</button>
-  <button class="btn" onclick="playLoop('yelp')">YELP</button>
-  <button class="btn" onclick="playLoop('t3')">T3</button>
+  <button class="btn" onclick="play('wail')">WAIL</button>
+  <button class="btn" onclick="play('yelp')">YELP</button>
 
-  <br>
+  <button class="btn" onclick="play('t3')">T3</button>
 
   <button class="btn manual"
-    onmousedown="startManual()"
-    onmouseup="stopManual()"
-    onmouseleave="stopManual()"
-    ontouchstart="startManual()"
+    ontouchstart="startManual(event)"
     ontouchend="stopManual()">
-    MANUAL (HOLD)
+    MANUAL
   </button>
 
   <button class="btn horn"
-    onmousedown="startHorn()"
-    onmouseup="stopHorn()"
-    onmouseleave="stopHorn()"
-    ontouchstart="startHorn()"
+    ontouchstart="startHorn(event)"
     ontouchend="stopHorn()">
-    HORN (HOLD)
+    HORN
   </button>
 
-  <br>
-
-  <button class="btn" onclick="stopAll()">STOP</button>
+  <button class="btn stop" onclick="stopAll()">STOP</button>
 </div>
 
 <div class="status" id="status">STANDBY</div>
 
-<!-- Sirens -->
+<!-- Sounds -->
 <audio id="wail" src="sounds/wail.mp3" loop></audio>
 <audio id="yelp" src="sounds/yelp.mp3" loop></audio>
 <audio id="t3" src="sounds/t3.mp3" loop></audio>
-
-<!-- Hold sounds -->
 <audio id="manual" src="sounds/manual.mp3" loop></audio>
 <audio id="horn" src="sounds/horn.mp3" loop></audio>
 
 <script>
-let sounds = ["wail", "yelp", "t3"];
-let manual = document.getElementById("manual");
-let horn = document.getElementById("horn");
-let statusText = document.getElementById("status");
-let redLight = document.getElementById("redLight");
-let blueLight = document.getElementById("blueLight");
+let modes = ["wail","yelp","t3"];
+let status = document.getElementById("status");
+let red = document.getElementById("red");
+let blue = document.getElementById("blue");
 
-function setStatus(text) {
-  statusText.innerText = text;
+function lights(on){
+  red.classList.toggle("active", on);
+  blue.classList.toggle("active", on);
 }
 
-function startLights() {
-  redLight.classList.add("active");
-  blueLight.classList.add("active");
-}
+function setStatus(t){ status.innerText = t; }
 
-function stopLights() {
-  redLight.classList.remove("active");
-  blueLight.classList.remove("active");
-}
-
-// Stop all sirens + hold sounds
-function stopAll() {
-  sounds.forEach(id => {
-    let s = document.getElementById(id);
-    s.pause();
-    s.currentTime = 0;
+function stopAll(){
+  modes.forEach(id=>{
+    let s=document.getElementById(id);
+    s.pause(); s.currentTime=0;
   });
-
-  manual.pause();
-  manual.currentTime = 0;
-
-  horn.pause();
-  horn.currentTime = 0;
-
-  stopLights();
+  stopManual();
+  stopHorn();
+  lights(false);
   setStatus("STANDBY");
 }
 
-// Play siren loop
-function playLoop(id) {
+function play(id){
   stopAll();
-  let sound = document.getElementById(id);
-  sound.play();
-  startLights();
+  document.getElementById(id).play();
+  lights(true);
   setStatus(id.toUpperCase());
 }
 
-// HOLD MANUAL
-function startManual() {
-  manual.currentTime = 0;
-  manual.play();
-  startLights();
+// MANUAL
+function startManual(e){
+  e.preventDefault();
+  let m=document.getElementById("manual");
+  m.currentTime=0; m.play();
+  lights(true);
   setStatus("MANUAL");
 }
-
-function stopManual() {
-  manual.pause();
-  manual.currentTime = 0;
-
-  let activeMode = sounds.find(id => !document.getElementById(id).paused);
-  if (activeMode) {
-    setStatus(activeMode.toUpperCase());
-    startLights();
-  } else {
-    horn.pause();
-    horn.currentTime = 0;
-    stopLights();
-    setStatus("STANDBY");
-  }
+function stopManual(){
+  let m=document.getElementById("manual");
+  m.pause(); m.currentTime=0;
 }
 
-// HOLD HORN
-function startHorn() {
-  horn.currentTime = 0;
-  horn.play();
-  startLights();
+// HORN
+function startHorn(e){
+  e.preventDefault();
+  let h=document.getElementById("horn");
+  h.currentTime=0; h.play();
+  lights(true);
   setStatus("HORN");
 }
-
-function stopHorn() {
-  horn.pause();
-  horn.currentTime = 0;
-
-  let activeMode = sounds.find(id => !document.getElementById(id).paused);
-  if (activeMode) {
-    setStatus(activeMode.toUpperCase());
-    startLights();
-  } else if (!manual.paused) {
-    setStatus("MANUAL");
-    startLights();
-  } else {
-    stopLights();
-    setStatus("STANDBY");
-  }
+function stopHorn(){
+  let h=document.getElementById("horn");
+  h.pause(); h.currentTime=0;
 }
 </script>
 
