@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Whelen HS3200 V4 Full Metal Dashboard</title>
+  <title>Whelen Controller Replica</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,1002 +11,636 @@
       user-select: none;
     }
 
-    :root {
-      --panel-border: #4f5964;
-      --panel-dark: #111418;
-      --panel-mid: #1b2026;
-      --panel-light: #2e353d;
-      --text-dim: #9ca7b2;
-      --text-bright: #eef3f8;
-    }
-
     body {
       margin: 0;
       min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #d8d8d8;
       font-family: Arial, Helvetica, sans-serif;
-      color: var(--text-bright);
-      background:
-        radial-gradient(circle at 50% 0%, #2b3138 0%, #13171b 35%, #050607 100%);
-      overflow-x: hidden;
-    }
-
-    .lightbar {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.12s linear;
-      background:
-        linear-gradient(90deg,
-          rgba(255,0,0,0.18) 0%,
-          rgba(255,0,0,0.04) 18%,
-          transparent 32%,
-          transparent 68%,
-          rgba(0,110,255,0.04) 82%,
-          rgba(0,110,255,0.18) 100%);
-      z-index: 0;
-    }
-
-    .lightbar.active {
-      opacity: 1;
-      animation: flashBar 0.28s linear infinite alternate;
-    }
-
-    @keyframes flashBar {
-      0% {
-        filter: brightness(1);
-        background:
-          linear-gradient(90deg,
-            rgba(255,0,0,0.22) 0%,
-            rgba(255,0,0,0.05) 20%,
-            transparent 34%,
-            transparent 66%,
-            rgba(0,110,255,0.05) 80%,
-            rgba(0,110,255,0.22) 100%);
-      }
-      50% {
-        background:
-          linear-gradient(90deg,
-            rgba(255,0,0,0.10) 0%,
-            rgba(255,0,0,0.02) 15%,
-            transparent 34%,
-            transparent 66%,
-            rgba(0,110,255,0.10) 85%,
-            rgba(0,110,255,0.02) 100%);
-      }
-      100% {
-        filter: brightness(1.1);
-        background:
-          linear-gradient(90deg,
-            rgba(255,0,0,0.26) 0%,
-            rgba(255,0,0,0.07) 17%,
-            transparent 33%,
-            transparent 67%,
-            rgba(0,110,255,0.07) 83%,
-            rgba(0,110,255,0.26) 100%);
-      }
-    }
-
-    .page {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 24px;
     }
 
-    .console {
-      width: min(1180px, 100%);
+    .unit {
+      width: 980px;
+      max-width: 100%;
       background:
-        linear-gradient(180deg, #2e353d 0%, #1b2026 10%, #12161a 55%, #0c0f12 100%);
-      border: 2px solid var(--panel-border);
+        linear-gradient(180deg, #3d3d3d 0%, #242424 10%, #111 55%, #202020 100%);
       border-radius: 26px;
-      box-shadow:
-        0 30px 90px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.05),
-        inset 0 -1px 0 rgba(0,0,0,0.8);
-      overflow: hidden;
+      padding: 24px 26px 22px;
       position: relative;
-    }
-
-    .screw {
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 35% 35%, #dfe6ec 0%, #919ba5 38%, #58616b 65%, #313840 100%);
       box-shadow:
-        inset 0 1px 1px rgba(255,255,255,0.25),
-        0 1px 3px rgba(0,0,0,0.6);
+        0 18px 38px rgba(0,0,0,.35),
+        inset 0 2px 8px rgba(255,255,255,.08),
+        inset 0 -3px 8px rgba(0,0,0,.45);
     }
 
-    .screw::after {
+    .unit::before {
       content: "";
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 10px;
-      height: 2px;
-      background: rgba(40,45,50,0.85);
-      transform: translate(-50%, -50%) rotate(-18deg);
-      border-radius: 2px;
+      inset: 8px;
+      border-radius: 20px;
+      pointer-events: none;
+      box-shadow:
+        inset 0 2px 8px rgba(255,255,255,.05),
+        inset 0 -2px 8px rgba(0,0,0,.3);
     }
 
-    .s1 { top: 12px; left: 12px; }
-    .s2 { top: 12px; right: 12px; }
-    .s3 { bottom: 12px; left: 12px; }
-    .s4 { bottom: 12px; right: 12px; }
-
-    .topbar {
-      padding: 18px 22px;
-      border-bottom: 1px solid #343c45;
+    .top-shadow {
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      pointer-events: none;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
-        linear-gradient(180deg, #2a3037, #1a1f25);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
+        radial-gradient(circle at 50% -30%, rgba(255,255,255,.18), transparent 38%),
+        radial-gradient(circle at 50% 120%, rgba(0,0,0,.18), transparent 34%);
+      mix-blend-mode: screen;
+      opacity: .35;
     }
 
-    .brand h1 {
-      margin: 0;
-      font-size: 25px;
-      letter-spacing: 1.8px;
-    }
-
-    .brand p {
-      margin: 4px 0 0;
-      color: var(--text-dim);
-      font-size: 12px;
-      letter-spacing: 2px;
-    }
-
-    .status-cluster {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .pilot {
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: #172028;
-      border: 1px solid #4b5560;
-      box-shadow: inset 0 0 8px rgba(0,0,0,.7);
-    }
-
-    .pilot.on {
-      background: #6cff9d;
-      box-shadow: 0 0 14px rgba(108,255,157,.75);
-    }
-
-    .status-box {
-      min-width: 180px;
-      text-align: center;
-      padding: 11px 16px;
-      border-radius: 12px;
-      background: #090c0f;
-      border: 1px solid #38414a;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      box-shadow: inset 0 0 12px rgba(0,0,0,.7);
-    }
-
-    .status-standby { color: #aab4be; }
-    .status-radio { color: #71d9ff; text-shadow: 0 0 10px rgba(113,217,255,.5); }
-    .status-wail { color: #58b6ff; text-shadow: 0 0 10px rgba(88,182,255,.5); }
-    .status-yelp { color: #ffe067; text-shadow: 0 0 10px rgba(255,224,103,.5); }
-    .status-phaser { color: #ff8857; text-shadow: 0 0 10px rgba(255,136,87,.5); }
-    .status-priority { color: #ff5e96; text-shadow: 0 0 10px rgba(255,94,150,.5); }
-    .status-manual { color: #75ffb0; text-shadow: 0 0 10px rgba(117,255,176,.5); }
-    .status-airhorn { color: #ff4b4b; text-shadow: 0 0 10px rgba(255,75,75,.65); }
-
-    .main {
+    .layout {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-    }
-
-    .left, .right {
-      padding: 22px;
+      grid-template-columns: 305px 1fr;
+      gap: 22px;
+      position: relative;
+      z-index: 1;
     }
 
     .left {
-      border-right: 1px solid #2a3138;
+      padding-top: 6px;
     }
 
-    .section-title {
-      margin: 0 0 14px;
-      font-size: 13px;
-      color: var(--text-dim);
-      letter-spacing: 2px;
+    .top-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    .metal-card {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        linear-gradient(180deg, #171c21, #0c1013);
-      border: 1px solid #333b44;
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.03),
-        inset 0 -1px 0 rgba(0,0,0,.6);
+    .mid-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
       margin-bottom: 16px;
     }
 
-    .rotary-wrap {
+    .bottom-row {
       display: grid;
-      grid-template-columns: 100px 1fr 100px;
-      align-items: center;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
 
-    .rotary-btn {
-      height: 64px;
-      border-radius: 16px;
-      border: 1px solid #444d57;
+    .btn {
+      min-height: 62px;
+      border: 2px solid #7c848d;
+      border-radius: 7px;
       background:
-        linear-gradient(180deg, #353d46, #15191e);
-      color: #f5f7fa;
-      font-size: 30px;
-      font-weight: bold;
-      cursor: pointer;
+        linear-gradient(180deg, #eef2f6 0%, #d8dde2 22%, #c8cdd3 52%, #afb5bc 100%);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.05),
-        0 8px 18px rgba(0,0,0,.35);
+        inset 0 2px 2px rgba(255,255,255,.9),
+        inset 0 -2px 3px rgba(0,0,0,.12),
+        0 2px 0 rgba(0,0,0,.18);
+      color: #42484e;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      padding: 6px 4px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.05;
+      letter-spacing: .2px;
+      position: relative;
     }
 
-    .rotary-btn:active,
-    .big-btn:active,
-    .toggle:active {
+    .btn:active {
       transform: translateY(1px);
     }
 
-    .knob-zone {
+    .btn.small {
+      min-height: 58px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .btn.bottom {
+      min-height: 62px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .tiny {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .tiny2 {
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .icon {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      padding: 8px 0;
+      justify-content: center;
+      gap: 3px;
+      font-size: 12px;
+    }
+
+    .wave {
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -3px;
+      transform: translateY(-2px);
+    }
+
+    .icon-mark {
+      font-size: 26px;
+      line-height: 1;
+      transform: translateY(-1px);
+    }
+
+    .speaker-icon {
+      width: 28px;
+      height: 18px;
+      position: relative;
+    }
+
+    .speaker-icon::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 11px;
+      height: 14px;
+      background: #6c737c;
+      clip-path: polygon(0 30%, 45% 30%, 78% 0, 78% 100%, 45% 70%, 0 70%);
+      border-radius: 1px;
+    }
+
+    .speaker-icon::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: 2px;
+      width: 14px;
+      height: 14px;
+      border-right: 3px solid #6c737c;
+      border-top: 3px solid transparent;
+      border-bottom: 3px solid transparent;
+      border-radius: 50%;
+      transform: scaleX(1.2);
+    }
+
+    .logo {
+      font-size: 58px;
+      font-weight: 900;
+      font-style: italic;
+      color: #e23737;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow:
+        -2px -2px 0 #f4f4f4,
+        2px -2px 0 #f4f4f4,
+        -2px 2px 0 #f4f4f4,
+        2px 2px 0 #f4f4f4,
+        0 3px 0 rgba(0,0,0,.18);
+      margin: 18px 0 18px 2px;
+      width: fit-content;
+    }
+
+    .logo sup {
+      font-size: 15px;
+      color: #f4f4f4;
+      text-shadow: none;
+      margin-left: 2px;
+      top: -1.2em;
+      position: relative;
+      font-style: normal;
+    }
+
+    .knob-area {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
     }
 
     .knob {
-      width: 250px;
-      height: 250px;
-      position: relative;
-      border-radius: 50%;
+      width: 88px;
+      height: 40px;
+      border-radius: 14px;
       background:
-        radial-gradient(circle at 35% 30%, #535c66 0%, #313841 30%, #171b20 60%, #0b0e11 100%);
-      border: 3px solid #4c5560;
+        linear-gradient(180deg, #141414, #272727 45%, #0d0d0d 100%);
       box-shadow:
-        inset 0 12px 24px rgba(255,255,255,.05),
-        inset 0 -14px 26px rgba(0,0,0,.65),
-        0 18px 34px rgba(0,0,0,.45);
-      transition: transform .18s ease;
+        inset 0 1px 2px rgba(255,255,255,.08),
+        inset 0 -2px 3px rgba(0,0,0,.55),
+        0 2px 4px rgba(0,0,0,.3);
+      position: relative;
     }
 
     .knob::before {
       content: "";
       position: absolute;
-      inset: 32px;
-      border-radius: 50%;
+      width: 10px;
+      height: 34px;
+      left: 8px;
+      top: 3px;
+      border-radius: 8px;
       background:
-        radial-gradient(circle at 30% 30%, #39414a 0%, #1a1f25 48%, #0c0f12 100%);
-      border: 2px solid #58616c;
-      box-shadow: inset 0 0 20px rgba(0,0,0,.6);
-    }
-
-    .pointer {
-      position: absolute;
-      left: 50%;
-      top: 16px;
-      transform: translateX(-50%);
-      width: 11px;
-      height: 62px;
-      border-radius: 9px;
-      background: linear-gradient(180deg, #ffffff, #a7b2bd);
-      box-shadow: 0 0 12px rgba(255,255,255,.25);
-    }
-
-    .knob-center-label {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      text-align: center;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      text-shadow: 0 1px 2px rgba(0,0,0,.5);
-    }
-
-    .knob-center-label .small {
-      display: block;
-      margin-top: 6px;
-      font-size: 11px;
-      color: var(--text-dim);
-      font-weight: normal;
-      letter-spacing: 1px;
-    }
-
-    .ring-label {
-      position: absolute;
-      font-size: 12px;
-      font-weight: bold;
-      color: #c8d0d8;
-      text-shadow: 0 1px 2px rgba(0,0,0,.65);
-      letter-spacing: 1px;
-    }
-
-    .ring-label.active {
-      color: #fff;
-      text-shadow: 0 0 12px rgba(255,255,255,.45);
-    }
-
-    .mode-strip {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-    }
-
-    .mode-indicator {
-      padding: 11px 8px;
-      border-radius: 12px;
-      background: #0c1013;
-      border: 1px solid #343c45;
-      text-align: center;
-      font-size: 12px;
-      letter-spacing: 1px;
-      color: var(--text-dim);
-    }
-
-    .mode-indicator.active {
-      color: white;
-      box-shadow: inset 0 0 16px rgba(255,255,255,.04), 0 0 12px rgba(255,255,255,.08);
-    }
-
-    .mode-indicator.radio.active { border-color: #71d9ff; color: #71d9ff; }
-    .mode-indicator.wail.active { border-color: #58b6ff; color: #58b6ff; }
-    .mode-indicator.yelp.active { border-color: #ffe067; color: #ffe067; }
-    .mode-indicator.phaser.active { border-color: #ff8857; color: #ff8857; }
-    .mode-indicator.priority.active { border-color: #ff5e96; color: #ff5e96; }
-
-    .control-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-
-    .big-btn {
-      min-height: 100px;
-      border-radius: 18px;
-      border: 1px solid #3f4852;
-      background:
-        linear-gradient(180deg, #333b44, #12171b);
-      color: #f4f8fb;
-      cursor: pointer;
-      padding: 14px;
+        linear-gradient(180deg, #3b3b3b, #121212);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.05),
-        0 8px 18px rgba(0,0,0,.35);
+        11px 0 0 #171717,
+        22px 0 0 #2e2e2e,
+        33px 0 0 #141414,
+        44px 0 0 #303030,
+        55px 0 0 #121212;
+      opacity: .9;
     }
 
-    .big-btn .big {
-      display: block;
-      font-size: 23px;
+    .led-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .arrow-left,
+    .arrow-right {
+      width: 0;
+      height: 0;
+    }
+
+    .arrow-left {
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-right: 14px solid #6f767e;
+    }
+
+    .arrow-right {
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 14px solid #6f767e;
+    }
+
+    .led {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #3a3a3a;
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.05),
+        inset 0 -1px 2px rgba(0,0,0,.55);
+    }
+
+    .led.active {
+      background: #d6d9dd;
+      box-shadow: 0 0 10px rgba(255,255,255,.45);
+    }
+
+    .pressed {
+      outline: 4px solid rgba(150,190,255,.35);
+    }
+
+    .screen {
+      margin-top: 20px;
+      width: 245px;
+      min-height: 54px;
+      border-radius: 12px;
+      background: #0e1114;
+      border: 1px solid #4d5660;
+      color: #a7ffbd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 900;
       letter-spacing: 1px;
+      font-size: 20px;
+      box-shadow: inset 0 0 14px rgba(0,0,0,.75);
     }
 
-    .big-btn .small {
-      display: block;
-      margin-top: 8px;
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-    }
-
-    .big-btn.manual.active {
-      border-color: #75ffb0;
-      box-shadow: 0 0 20px rgba(117,255,176,.18), inset 0 0 14px rgba(117,255,176,.1);
-    }
-
-    .big-btn.horn {
-      border-color: #6b2626;
-      background: linear-gradient(180deg, #672323, #1d0c0c);
-    }
-
-    .big-btn.horn .small {
-      color: #f0b5b5;
-    }
-
-    .big-btn.horn.active {
-      border-color: #ff5e5e;
-      box-shadow: 0 0 22px rgba(255,94,94,.22), inset 0 0 14px rgba(255,94,94,.1);
-    }
-
-    .switch-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    .toggle-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      background: #0d1114;
-      border: 1px solid #343c45;
-    }
-
-    .toggle-info {
-      font-size: 13px;
-      color: #d9e1e8;
-      letter-spacing: 1px;
-    }
-
-    .toggle-info small {
-      display: block;
-      margin-top: 5px;
-      font-size: 11px;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-    }
-
-    .toggle {
-      width: 64px;
-      height: 34px;
-      border-radius: 999px;
-      border: 1px solid #47515b;
-      background: linear-gradient(180deg, #313841, #13181d);
-      position: relative;
-      cursor: pointer;
-      box-shadow: inset 0 0 10px rgba(0,0,0,.5);
-    }
-
-    .toggle::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 4px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: linear-gradient(180deg, #dbe2e8, #8f99a4);
-      box-shadow: 0 2px 6px rgba(0,0,0,.5);
-      transition: left .15s ease;
-    }
-
-    .toggle.on {
-      background: linear-gradient(180deg, #2f5f46, #13261c);
-      border-color: #4faf7b;
-    }
-
-    .toggle.on::after {
-      left: 32px;
-    }
-
-    .info-card {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        linear-gradient(180deg, #171c21, #0c1013);
-      border: 1px solid #333b44;
-      border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .info-card h3 {
-      margin: 0 0 12px;
-      font-size: 13px;
-      color: var(--text-dim);
-      letter-spacing: 2px;
-    }
-
-    .key-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 10px 0;
-      font-size: 14px;
-    }
-
-    .kbd {
-      min-width: 48px;
-      text-align: center;
-      padding: 7px 10px;
-      border-radius: 10px;
-      background: #090c0f;
-      border: 1px solid #343c45;
-      font-weight: bold;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      cursor: pointer;
-    }
-
-    .note {
-      font-size: 12px;
-      color: var(--text-dim);
-      line-height: 1.55;
-    }
-
-    @media (max-width: 930px) {
-      .main {
+    @media (max-width: 960px) {
+      .layout {
         grid-template-columns: 1fr;
       }
 
       .left {
-        border-right: 0;
-        border-bottom: 1px solid #2a3138;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
-      .rotary-wrap {
-        grid-template-columns: 78px 1fr 78px;
+      .top-row {
+        grid-template-columns: repeat(4, 1fr);
       }
 
-      .knob {
-        width: 210px;
-        height: 210px;
+      .mid-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .unit {
+        padding: 18px;
       }
 
-      .control-grid,
-      .switch-row,
-      .mode-strip {
+      .top-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .mid-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bottom-row {
         grid-template-columns: 1fr;
+      }
+
+      .logo {
+        font-size: 42px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="lightbar" class="lightbar"></div>
+  <div class="unit">
+    <div class="top-shadow"></div>
 
-  <div class="page">
-    <div class="console">
-      <div class="screw s1"></div>
-      <div class="screw s2"></div>
-      <div class="screw s3"></div>
-      <div class="screw s4"></div>
+    <div class="layout">
+      <div class="left">
+        <div class="logo">WHELEN<sup>®</sup></div>
 
-      <div class="topbar">
-        <div class="brand">
-          <h1>WHELEN HS3200</h1>
-          <p>V4 FULL METAL DASHBOARD</p>
+        <div class="knob-area">
+          <div class="knob"></div>
         </div>
 
-        <div class="status-cluster">
-          <div id="powerPilot" class="pilot"></div>
-          <div id="statusBox" class="status-box status-standby">STANDBY</div>
+        <div class="led-row">
+          <div class="arrow-left"></div>
+          <div class="led" id="led1"></div>
+          <div class="led" id="led2"></div>
+          <div class="led" id="led3"></div>
+          <div class="led" id="led4"></div>
+          <div class="led" id="led5"></div>
+          <div class="led" id="led6"></div>
+          <div class="arrow-right"></div>
         </div>
+
+        <div class="screen" id="screen">STAND BY</div>
       </div>
 
-      <div class="main">
-        <div class="left">
-          <h2 class="section-title">ROTARY SELECTOR</h2>
+      <div class="right">
+        <div class="top-row">
+          <button class="btn small" data-name="standby" onclick="stopAll(true)">STAND<br>BY</button>
 
-          <div class="metal-card">
-            <div class="rotary-wrap">
-              <button class="rotary-btn" onclick="rotateLeft()">−</button>
-
-              <div class="knob-zone">
-                <div id="knob" class="knob">
-                  <div id="label-radio" class="ring-label" style="left:50%; top:-4px; transform:translateX(-50%);">RADIO</div>
-                  <div id="label-wail" class="ring-label" style="right:18px; top:38px;">WAIL</div>
-                  <div id="label-yelp" class="ring-label" style="right:6px; bottom:72px;">YELP</div>
-                  <div id="label-phaser" class="ring-label" style="left:6px; bottom:72px;">PHASER</div>
-                  <div id="label-priority" class="ring-label" style="left:14px; top:38px;">PRIORITY</div>
-
-                  <div class="pointer"></div>
-
-                  <div class="knob-center-label">
-                    <span id="knobModeText">RADIO</span>
-                    <span class="small">ROTARY SELECTOR</span>
-                  </div>
-                </div>
-              </div>
-
-              <button class="rotary-btn" onclick="rotateRight()">+</button>
+          <button class="btn small" data-name="radio" onclick="setMode('radio', this)">
+            <div class="icon">
+              <div class="tiny">(((↯)))</div>
+              <div>RAD</div>
             </div>
+          </button>
 
-            <div class="mode-strip">
-              <div id="indicator-radio" class="mode-indicator radio">RADIO</div>
-              <div id="indicator-wail" class="mode-indicator wail">WAIL</div>
-              <div id="indicator-yelp" class="mode-indicator yelp">YELP</div>
-              <div id="indicator-phaser" class="mode-indicator phaser">PHASER</div>
-              <div id="indicator-priority" class="mode-indicator priority">PRIORITY</div>
+          <button class="btn small" data-name="hf" onclick="setMode('hf', this)">
+            <div class="icon">
+              <div class="icon-mark">☢</div>
+              <div>HF</div>
             </div>
-          </div>
+          </button>
 
-          <h2 class="section-title">PRIMARY CONTROLS</h2>
-
-          <div class="metal-card">
-            <div class="control-grid">
-              <button id="manualBtn" class="big-btn manual"
-                onmousedown="startManual()"
-                onmouseup="stopManual()"
-                onmouseleave="stopManual()"
-                ontouchstart="startManual(event)"
-                ontouchend="stopManual(event)">
-                <span class="big">MANUAL</span>
-                <span class="small">PRESS AND HOLD</span>
-              </button>
-
-              <button id="hornBtn" class="big-btn horn"
-                onmousedown="startHorn()"
-                onmouseup="stopHorn()"
-                onmouseleave="stopHorn()"
-                ontouchstart="startHorn(event)"
-                ontouchend="stopHorn(event)">
-                <span class="big">AIRHORN</span>
-                <span class="small">PRESS AND HOLD</span>
-              </button>
-
-              <button class="big-btn" onclick="stopAll(true)">
-                <span class="big">STOP</span>
-                <span class="small">ALL AUDIO OFF</span>
-              </button>
+          <button class="btn small" data-name="wail" onclick="setMode('wail', this)">
+            <div class="icon">
+              <div class="wave">∿∿</div>
+              <div>WAIL</div>
             </div>
-          </div>
+          </button>
 
-          <h2 class="section-title">TOGGLE SWITCHES</h2>
-
-          <div class="metal-card">
-            <div class="switch-row">
-              <div class="toggle-wrap">
-                <div class="toggle-info">
-                  LIGHTBAR
-                  <small>RED / BLUE FLASH</small>
-                </div>
-                <button id="lightbarToggle" class="toggle on" onclick="toggleLightbar()"></button>
-              </div>
-
-              <div class="toggle-wrap">
-                <div class="toggle-info">
-                  AUTO STARTUP
-                  <small>BOOT SOUND ON LOAD</small>
-                </div>
-                <button id="startupToggle" class="toggle on" onclick="toggleStartup()"></button>
-              </div>
+          <button class="btn small" data-name="yelp" onclick="setMode('yelp', this)">
+            <div class="icon">
+              <div class="wave" style="letter-spacing:-4px;">∿∿∿</div>
+              <div>YELP</div>
             </div>
-          </div>
+          </button>
+
+          <button class="btn small" data-name="t3" onclick="setMode('t3', this)">T3</button>
+
+          <button class="btn small" data-name="manhold"
+            onmousedown="startManual(this)"
+            onmouseup="stopManual()"
+            onmouseleave="stopManual()"
+            ontouchstart="startManual(this, event)"
+            ontouchend="stopManual(event)">
+            <div class="icon">
+              <div class="icon-mark">☞</div>
+              <div>MAN</div>
+            </div>
+          </button>
+
+          <button class="btn small" data-name="horn"
+            onmousedown="startHorn(this)"
+            onmouseup="stopHorn()"
+            onmouseleave="stopHorn()"
+            ontouchstart="startHorn(this, event)"
+            ontouchend="stopHorn(event)">
+            <div class="icon">
+              <div class="icon-mark">📯</div>
+              <div>HORN</div>
+            </div>
+          </button>
         </div>
 
-        <div class="right">
-          <div class="info-card">
-            <h3>KEYBOARD</h3>
-            <div class="key-row"><span>Rotate Left</span><span class="kbd">←</span></div>
-            <div class="key-row"><span>Rotate Right</span><span class="kbd">→</span></div>
-            <div class="key-row"><span>Radio / Wail / Yelp / Phaser / Priority</span><span class="kbd">1-5</span></div>
-            <div class="key-row"><span>Manual</span><span class="kbd">M</span></div>
-            <div class="key-row"><span>Airhorn</span><span class="kbd">Space</span></div>
-            <div class="key-row"><span>Stop</span><span class="kbd">0</span></div>
-          </div>
+        <div class="mid-grid">
+          <button class="btn small" onclick="flashTemp('left')">
+            <div class="speaker-icon"></div>
+          </button>
 
-          <div class="info-card">
-            <h3>MASTER VOLUME</h3>
-            <input id="masterVolume" type="range" min="0" max="100" value="100">
-          </div>
+          <button class="btn small" onclick="flashTemp('center1')">
+            <div class="speaker-icon" style="transform:scaleX(1.15)"></div>
+          </button>
 
-          <div class="info-card">
-            <h3>SOUND FILES</h3>
-            <div class="note">
-              Put these inside your <strong>sounds</strong> folder:
-              <br><br>
-              <strong>startup.mp3</strong><br>
-              <strong>radio.mp3</strong><br>
-              <strong>wail.mp3</strong><br>
-              <strong>yelp.mp3</strong><br>
-              <strong>phaser.mp3</strong><br>
-              <strong>priority.mp3</strong><br>
-              <strong>manual.mp3</strong><br>
-              <strong>airhorn.mp3</strong>
-            </div>
-          </div>
+          <button class="btn small" onclick="flashTemp('center2')">
+            <div class="speaker-icon" style="transform:scaleX(1.3)"></div>
+          </button>
 
-          <div class="info-card">
-            <h3>NOTES</h3>
-            <div class="note">
-              Best result:
-              <br><br>
-              - use loopable siren audio
-              <br>
-              - use a long airhorn sample
-              <br>
-              - use a short boot chirp for startup.mp3
-            </div>
-          </div>
+          <button class="btn small" onclick="flashTemp('tdflash')">TD<br>FLASH</button>
+          <button class="btn small" onclick="flashTemp('scene')">SCENE</button>
+
+          <button class="btn small" onclick="flashTemp('tracerleft')">TRACER<br>LEFT</button>
+          <button class="btn small" onclick="flashTemp('tracerrear')">TRACER<br>REAR</button>
+          <button class="btn small" onclick="flashTemp('inneredge')">INNER<br>EDGE</button>
+          <button class="btn small" onclick="flashTemp('tailcut')">TAIL<br>CUT</button>
+          <button class="btn small" onclick="flashTemp('override')">OVER<br>RIDE</button>
+        </div>
+
+        <div class="bottom-row">
+          <button class="btn bottom" onclick="flashTemp('leftarrow')">⬅</button>
+          <button class="btn bottom" onclick="flashTemp('rightarrow')">➡</button>
+          <button class="btn bottom" onclick="flashTemp('flash')">FLASH</button>
         </div>
       </div>
     </div>
   </div>
 
-  <audio id="startup" src="sounds/startup.mp3" preload="auto"></audio>
   <audio id="radio" src="sounds/radio.mp3" loop preload="auto"></audio>
+  <audio id="hf" src="sounds/hf.mp3" loop preload="auto"></audio>
   <audio id="wail" src="sounds/wail.mp3" loop preload="auto"></audio>
   <audio id="yelp" src="sounds/yelp.mp3" loop preload="auto"></audio>
-  <audio id="phaser" src="sounds/phaser.mp3" loop preload="auto"></audio>
-  <audio id="priority" src="sounds/priority.mp3" loop preload="auto"></audio>
+  <audio id="t3" src="sounds/t3.mp3" loop preload="auto"></audio>
   <audio id="manual" src="sounds/manual.mp3" loop preload="auto"></audio>
-  <audio id="airhorn" src="sounds/airhorn.mp3" loop preload="auto"></audio>
+  <audio id="horn" src="sounds/horn.mp3" loop preload="auto"></audio>
 
   <script>
-    const modes = ["radio", "wail", "yelp", "phaser", "priority"];
-    const angles = {
-      radio: 0,
-      wail: 72,
-      yelp: 144,
-      phaser: 216,
-      priority: 288
-    };
+    const modeIds = ["radio", "hf", "wail", "yelp", "t3"];
+    const audioMap = {};
+    modeIds.forEach(id => audioMap[id] = document.getElementById(id));
 
-    const players = {
-      radio: document.getElementById("radio"),
-      wail: document.getElementById("wail"),
-      yelp: document.getElementById("yelp"),
-      phaser: document.getElementById("phaser"),
-      priority: document.getElementById("priority")
-    };
-
-    const startup = document.getElementById("startup");
     const manual = document.getElementById("manual");
-    const airhorn = document.getElementById("airhorn");
+    const horn = document.getElementById("horn");
+    const screen = document.getElementById("screen");
+    const leds = [
+      document.getElementById("led1"),
+      document.getElementById("led2"),
+      document.getElementById("led3"),
+      document.getElementById("led4"),
+      document.getElementById("led5"),
+      document.getElementById("led6")
+    ];
 
-    const knob = document.getElementById("knob");
-    const knobModeText = document.getElementById("knobModeText");
-    const statusBox = document.getElementById("statusBox");
-    const powerPilot = document.getElementById("powerPilot");
-    const volumeSlider = document.getElementById("masterVolume");
-    const manualBtn = document.getElementById("manualBtn");
-    const hornBtn = document.getElementById("hornBtn");
-    const lightbarEl = document.getElementById("lightbar");
-    const lightbarToggleBtn = document.getElementById("lightbarToggle");
-    const startupToggleBtn = document.getElementById("startupToggle");
-
-    let currentIndex = 0;
-    let currentMode = modes[currentIndex];
-    let masterVolume = 1;
+    let currentMode = null;
+    let activeButton = null;
     let hornActive = false;
     let manualActive = false;
-    let hornKeyDown = false;
-    let manualKeyDown = false;
-    let lightbarEnabled = true;
-    let startupEnabled = true;
 
-    function applyVolumes() {
-      for (const mode of modes) {
-        players[mode].volume = masterVolume * (hornActive ? 0.35 : 1.0);
-      }
-      manual.volume = masterVolume;
-      airhorn.volume = masterVolume;
-      startup.volume = Math.min(masterVolume, 0.9);
+    function clearPressed() {
+      document.querySelectorAll(".btn").forEach(btn => btn.classList.remove("pressed"));
     }
 
-    function updatePowerPilot() {
-      const active = currentMode !== null || manualActive || hornActive;
-      powerPilot.classList.toggle("on", active);
+    function clearLeds() {
+      leds.forEach(led => led.classList.remove("active"));
     }
 
-    function updateLightbar() {
-      const shouldFlash = lightbarEnabled && (currentMode !== "radio" || hornActive || manualActive);
-      lightbarEl.classList.toggle("active", shouldFlash);
-      lightbarToggleBtn.classList.toggle("on", lightbarEnabled);
-    }
+    function setLedPattern(mode) {
+      clearLeds();
 
-    function setStatus(text, cls) {
-      statusBox.className = "status-box " + cls;
-      statusBox.textContent = text;
-      updatePowerPilot();
-      updateLightbar();
+      if (mode === "radio") leds[0].classList.add("active");
+      if (mode === "hf") leds[0].classList.add("active"), leds[1].classList.add("active");
+      if (mode === "wail") leds[1].classList.add("active"), leds[2].classList.add("active");
+      if (mode === "yelp") leds[2].classList.add("active"), leds[3].classList.add("active");
+      if (mode === "t3") leds[3].classList.add("active"), leds[4].classList.add("active");
     }
 
     function stopPrimary() {
-      for (const mode of modes) {
-        players[mode].pause();
-        players[mode].currentTime = 0;
-      }
-    }
-
-    function playCurrentMode() {
-      stopPrimary();
-      if (currentMode && players[currentMode]) {
-        players[currentMode].currentTime = 0;
-        players[currentMode].play().catch(() => {});
-      }
-    }
-
-    function refreshIndicators() {
-      modes.forEach(mode => {
-        document.getElementById("indicator-" + mode).classList.toggle("active", mode === currentMode);
-        document.getElementById("label-" + mode).classList.toggle("active", mode === currentMode);
+      modeIds.forEach(id => {
+        audioMap[id].pause();
+        audioMap[id].currentTime = 0;
       });
     }
 
-    function refreshKnob() {
-      knob.style.transform = `rotate(${angles[currentMode]}deg)`;
-      knobModeText.textContent = currentMode.toUpperCase();
-      refreshIndicators();
+    function setScreen(text) {
+      screen.textContent = text;
     }
 
-    function refreshStatus() {
-      if (hornActive) return setStatus("AIRHORN", "status-airhorn");
-      if (manualActive) return setStatus("MANUAL", "status-manual");
+    function setMode(mode, buttonEl) {
+      stopPrimary();
+      currentMode = mode;
+      if (audioMap[mode]) {
+        audioMap[mode].currentTime = 0;
+        audioMap[mode].play().catch(() => {});
+      }
 
-      if (currentMode === "radio") return setStatus("RADIO", "status-radio");
-      if (currentMode === "wail") return setStatus("WAIL", "status-wail");
-      if (currentMode === "yelp") return setStatus("YELP", "status-yelp");
-      if (currentMode === "phaser") return setStatus("PHASER", "status-phaser");
-      if (currentMode === "priority") return setStatus("PRIORITY", "status-priority");
+      clearPressed();
+      if (buttonEl) {
+        buttonEl.classList.add("pressed");
+        activeButton = buttonEl;
+      }
 
-      return setStatus("STANDBY", "status-standby");
-    }
-
-    function setModeByIndex(index) {
-      currentIndex = (index + modes.length) % modes.length;
-      currentMode = modes[currentIndex];
-      refreshKnob();
-      playCurrentMode();
-      refreshStatus();
-    }
-
-    function rotateLeft() {
-      setModeByIndex(currentIndex - 1);
-    }
-
-    function rotateRight() {
-      setModeByIndex(currentIndex + 1);
-    }
-
-    function stopManualInternal() {
-      manual.pause();
-      manual.currentTime = 0;
-      manualActive = false;
-      manualBtn.classList.remove("active");
-    }
-
-    function stopHornInternal() {
-      airhorn.pause();
-      airhorn.currentTime = 0;
-      hornActive = false;
-      hornBtn.classList.remove("active");
-      applyVolumes();
-    }
-
-    function startManual(event) {
-      if (event) event.preventDefault();
-      if (manualActive) return;
-      manualActive = true;
-      manualBtn.classList.add("active");
-      manual.currentTime = 0;
-      manual.play().catch(() => {});
-      refreshStatus();
-    }
-
-    function stopManual(event) {
-      if (event) event.preventDefault();
-      stopManualInternal();
-      refreshStatus();
-    }
-
-    function startHorn(event) {
-      if (event) event.preventDefault();
-      if (hornActive) return;
-      hornActive = true;
-      hornBtn.classList.add("active");
-      applyVolumes();
-      airhorn.currentTime = 0;
-      airhorn.play().catch(() => {});
-      refreshStatus();
-    }
-
-    function stopHorn(event) {
-      if (event) event.preventDefault();
-      stopHornInternal();
-      refreshStatus();
+      setLedPattern(mode);
+      setScreen(mode.toUpperCase());
     }
 
     function stopAll() {
       stopPrimary();
-      stopManualInternal();
-      stopHornInternal();
-      refreshStatus();
-    }
-
-    function toggleLightbar() {
-      lightbarEnabled = !lightbarEnabled;
-      lightbarToggleBtn.classList.toggle("on", lightbarEnabled);
-      updateLightbar();
-    }
-
-    function toggleStartup() {
-      startupEnabled = !startupEnabled;
-      startupToggleBtn.classList.toggle("on", startupEnabled);
-    }
-
-    volumeSlider.addEventListener("input", () => {
-      masterVolume = Number(volumeSlider.value) / 100;
-      applyVolumes();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      const key = e.key.toLowerCase();
-
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        rotateLeft();
-      }
-
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        rotateRight();
-      }
-
-      if (key === "1") setModeByIndex(0);
-      if (key === "2") setModeByIndex(1);
-      if (key === "3") setModeByIndex(2);
-      if (key === "4") setModeByIndex(3);
-      if (key === "5") setModeByIndex(4);
-      if (key === "0") stopAll();
-
-      if (key === "m" && !manualKeyDown) {
-        manualKeyDown = true;
-        startManual();
-      }
-
-      if (e.code === "Space" && !hornKeyDown) {
-        e.preventDefault();
-        hornKeyDown = true;
-        startHorn();
-      }
-    });
-
-    document.addEventListener("keyup", (e) => {
-      const key = e.key.toLowerCase();
-
-      if (key === "m") {
-        manualKeyDown = false;
-        stopManual();
-      }
-
-      if (e.code === "Space") {
-        e.preventDefault();
-        hornKeyDown = false;
-        stopHorn();
-      }
-    });
-
-    window.addEventListener("blur", () => {
-      hornKeyDown = false;
-      manualKeyDown = false;
-      stopManual();
       stopHorn();
-    });
+      stopManual();
+      currentMode = null;
+      activeButton = null;
+      clearPressed();
+      clearLeds();
+      setScreen("STAND BY");
+    }
 
-    document.addEventListener("click", function firstInteraction() {
-      if (startupEnabled) {
-        startup.currentTime = 0;
-        startup.play().catch(() => {});
+    function startHorn(buttonEl, e) {
+      if (e) e.preventDefault();
+      hornActive = true;
+      clearPressed();
+      if (buttonEl) buttonEl.classList.add("pressed");
+      horn.currentTime = 0;
+      horn.play().catch(() => {});
+      setScreen("HORN");
+      leds[5].classList.add("active");
+    }
+
+    function stopHorn(e) {
+      if (e) e.preventDefault();
+      hornActive = false;
+      horn.pause();
+      horn.currentTime = 0;
+      leds[5].classList.remove("active");
+
+      clearPressed();
+      if (activeButton) activeButton.classList.add("pressed");
+
+      if (manualActive) {
+        setScreen("MAN");
+      } else if (currentMode) {
+        setScreen(currentMode.toUpperCase());
+      } else {
+        setScreen("STAND BY");
       }
-      document.removeEventListener("click", firstInteraction);
-    }, { once: true });
+    }
 
-    applyVolumes();
-    refreshKnob();
-    playCurrentMode();
-    refreshStatus();
-    lightbarToggleBtn.classList.add("on");
-    startupToggleBtn.classList.add("on");
+    function startManual(buttonEl, e) {
+      if (e) e.preventDefault();
+      manualActive = true;
+      clearPressed();
+      if (buttonEl) buttonEl.classList.add("pressed");
+      manual.currentTime = 0;
+      manual.play().catch(() => {});
+      setScreen("MAN");
+      leds[4].classList.add("active");
+    }
+
+    function stopManual(e) {
+      if (e) e.preventDefault();
+      manualActive = false;
+      manual.pause();
+      manual.currentTime = 0;
+      leds[4].classList.remove("active");
+
+      clearPressed();
+      if (activeButton) activeButton.classList.add("pressed");
+
+      if (hornActive) {
+        setScreen("HORN");
+      } else if (currentMode) {
+        setScreen(currentMode.toUpperCase());
+      } else {
+        setScreen("STAND BY");
+      }
+    }
+
+    function flashTemp(name) {
+      setScreen(name.toUpperCase());
+      const i = Math.floor(Math.random() * leds.length);
+      leds[i].classList.add("active");
+      setTimeout(() => {
+        if (!currentMode) clearLeds();
+        else setLedPattern(currentMode);
+      }, 180);
+    }
   </script>
 </body>
 </html>
