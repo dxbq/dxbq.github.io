@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HS3200 Siren Console</title>
+  <title>Whelen HS3200 V4 Full Metal Dashboard</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,98 +11,206 @@
       user-select: none;
     }
 
+    :root {
+      --panel-border: #4f5964;
+      --panel-dark: #111418;
+      --panel-mid: #1b2026;
+      --panel-light: #2e353d;
+      --text-dim: #9ca7b2;
+      --text-bright: #eef3f8;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(circle at top, #1b1f24 0%, #0d0f12 40%, #050607 100%);
       font-family: Arial, Helvetica, sans-serif;
-      color: #e8eef5;
+      color: var(--text-bright);
+      background:
+        radial-gradient(circle at 50% 0%, #2b3138 0%, #13171b 35%, #050607 100%);
+      overflow-x: hidden;
+    }
+
+    .lightbar {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s linear;
+      background:
+        linear-gradient(90deg,
+          rgba(255,0,0,0.18) 0%,
+          rgba(255,0,0,0.04) 18%,
+          transparent 32%,
+          transparent 68%,
+          rgba(0,110,255,0.04) 82%,
+          rgba(0,110,255,0.18) 100%);
+      z-index: 0;
+    }
+
+    .lightbar.active {
+      opacity: 1;
+      animation: flashBar 0.28s linear infinite alternate;
+    }
+
+    @keyframes flashBar {
+      0% {
+        filter: brightness(1);
+        background:
+          linear-gradient(90deg,
+            rgba(255,0,0,0.22) 0%,
+            rgba(255,0,0,0.05) 20%,
+            transparent 34%,
+            transparent 66%,
+            rgba(0,110,255,0.05) 80%,
+            rgba(0,110,255,0.22) 100%);
+      }
+      50% {
+        background:
+          linear-gradient(90deg,
+            rgba(255,0,0,0.10) 0%,
+            rgba(255,0,0,0.02) 15%,
+            transparent 34%,
+            transparent 66%,
+            rgba(0,110,255,0.10) 85%,
+            rgba(0,110,255,0.02) 100%);
+      }
+      100% {
+        filter: brightness(1.1);
+        background:
+          linear-gradient(90deg,
+            rgba(255,0,0,0.26) 0%,
+            rgba(255,0,0,0.07) 17%,
+            transparent 33%,
+            transparent 67%,
+            rgba(0,110,255,0.07) 83%,
+            rgba(0,110,255,0.26) 100%);
+      }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
     }
 
     .console {
-      width: min(980px, 100%);
-      background: linear-gradient(180deg, #1a1d21, #0d0f12);
-      border: 2px solid #2e3338;
-      border-radius: 22px;
+      width: min(1180px, 100%);
+      background:
+        linear-gradient(180deg, #2e353d 0%, #1b2026 10%, #12161a 55%, #0c0f12 100%);
+      border: 2px solid var(--panel-border);
+      border-radius: 26px;
       box-shadow:
-        0 20px 60px rgba(0,0,0,0.65),
-        inset 0 1px 0 rgba(255,255,255,0.04),
-        inset 0 -1px 0 rgba(0,0,0,0.7);
+        0 30px 90px rgba(0,0,0,0.65),
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        inset 0 -1px 0 rgba(0,0,0,0.8);
       overflow: hidden;
+      position: relative;
     }
 
+    .screw {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, #dfe6ec 0%, #919ba5 38%, #58616b 65%, #313840 100%);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.25),
+        0 1px 3px rgba(0,0,0,0.6);
+    }
+
+    .screw::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 10px;
+      height: 2px;
+      background: rgba(40,45,50,0.85);
+      transform: translate(-50%, -50%) rotate(-18deg);
+      border-radius: 2px;
+    }
+
+    .s1 { top: 12px; left: 12px; }
+    .s2 { top: 12px; right: 12px; }
+    .s3 { bottom: 12px; left: 12px; }
+    .s4 { bottom: 12px; right: 12px; }
+
     .topbar {
+      padding: 18px 22px;
+      border-bottom: 1px solid #343c45;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+        linear-gradient(180deg, #2a3037, #1a1f25);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      background: linear-gradient(180deg, #2a2f35, #171b1f);
-      border-bottom: 1px solid #31363b;
-    }
-
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .brand h1 {
       margin: 0;
-      font-size: 22px;
-      letter-spacing: 1.2px;
+      font-size: 25px;
+      letter-spacing: 1.8px;
     }
 
     .brand p {
-      margin: 0;
+      margin: 4px 0 0;
+      color: var(--text-dim);
       font-size: 12px;
-      color: #96a0aa;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
     }
 
-    .status-wrap {
+    .status-cluster {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
-      justify-content: flex-end;
     }
 
-    .status-label {
-      font-size: 12px;
-      color: #9aa5b1;
-      letter-spacing: 1px;
+    .pilot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #172028;
+      border: 1px solid #4b5560;
+      box-shadow: inset 0 0 8px rgba(0,0,0,.7);
+    }
+
+    .pilot.on {
+      background: #6cff9d;
+      box-shadow: 0 0 14px rgba(108,255,157,.75);
     }
 
     .status-box {
-      min-width: 150px;
+      min-width: 180px;
       text-align: center;
-      padding: 10px 14px;
+      padding: 11px 16px;
       border-radius: 12px;
-      background: #0a0c0e;
-      border: 1px solid #2f363d;
-      box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
+      background: #090c0f;
+      border: 1px solid #38414a;
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
+      box-shadow: inset 0 0 12px rgba(0,0,0,.7);
     }
 
-    .status-standby { color: #9ea7b1; }
-    .status-wail { color: #5ab4ff; text-shadow: 0 0 8px rgba(90,180,255,.5); }
-    .status-yelp { color: #ffdf5a; text-shadow: 0 0 8px rgba(255,223,90,.45); }
-    .status-phaser { color: #ff7b5a; text-shadow: 0 0 8px rgba(255,123,90,.45); }
-    .status-priority { color: #ff5a86; text-shadow: 0 0 8px rgba(255,90,134,.5); }
-    .status-airhorn { color: #ff4d4d; text-shadow: 0 0 10px rgba(255,77,77,.65); }
-    .status-manual { color: #6dff9d; text-shadow: 0 0 8px rgba(109,255,157,.5); }
+    .status-standby { color: #aab4be; }
+    .status-radio { color: #71d9ff; text-shadow: 0 0 10px rgba(113,217,255,.5); }
+    .status-wail { color: #58b6ff; text-shadow: 0 0 10px rgba(88,182,255,.5); }
+    .status-yelp { color: #ffe067; text-shadow: 0 0 10px rgba(255,224,103,.5); }
+    .status-phaser { color: #ff8857; text-shadow: 0 0 10px rgba(255,136,87,.5); }
+    .status-priority { color: #ff5e96; text-shadow: 0 0 10px rgba(255,94,150,.5); }
+    .status-manual { color: #75ffb0; text-shadow: 0 0 10px rgba(117,255,176,.5); }
+    .status-airhorn { color: #ff4b4b; text-shadow: 0 0 10px rgba(255,75,75,.65); }
 
     .main {
       display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 0;
+      grid-template-columns: 1.1fr 0.9fr;
     }
 
     .left, .right {
@@ -110,191 +218,299 @@
     }
 
     .left {
-      border-right: 1px solid #272c31;
+      border-right: 1px solid #2a3138;
     }
 
     .section-title {
       margin: 0 0 14px;
       font-size: 13px;
-      color: #97a2ad;
+      color: var(--text-dim);
       letter-spacing: 2px;
     }
 
-    .mode-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    .mode-btn, .action-btn, .horn-btn {
-      border: 1px solid #39414a;
-      border-radius: 18px;
+    .metal-card {
       background:
-        linear-gradient(180deg, #2b3138 0%, #171b1f 48%, #0e1114 100%);
-      color: #edf3f8;
-      cursor: pointer;
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        linear-gradient(180deg, #171c21, #0c1013);
+      border: 1px solid #333b44;
+      border-radius: 20px;
+      padding: 18px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.05),
-        inset 0 -2px 6px rgba(0,0,0,0.55),
-        0 8px 20px rgba(0,0,0,0.32);
-      transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease;
+        inset 0 1px 0 rgba(255,255,255,.03),
+        inset 0 -1px 0 rgba(0,0,0,.6);
+      margin-bottom: 16px;
     }
 
-    .mode-btn:active, .action-btn:active, .horn-btn:active {
-      transform: translateY(1px) scale(.995);
-    }
-
-    .mode-btn {
-      position: relative;
-      padding: 18px 14px 18px;
-      min-height: 105px;
-      text-align: left;
-    }
-
-    .mode-btn .led {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #192027;
-      border: 1px solid #48505a;
-      box-shadow: inset 0 0 8px rgba(0,0,0,.75);
-      margin-bottom: 14px;
-    }
-
-    .mode-btn .name {
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    .mode-btn .sub {
-      margin-top: 6px;
-      font-size: 12px;
-      color: #9aa5af;
-      letter-spacing: 1px;
-    }
-
-    .mode-btn.active {
-      border-color: #6e7883;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.07),
-        inset 0 -2px 6px rgba(0,0,0,0.55),
-        0 0 0 1px rgba(255,255,255,0.03),
-        0 10px 25px rgba(0,0,0,0.38);
-    }
-
-    .mode-btn.active[data-mode="wail"] .led {
-      background: #55b2ff;
-      box-shadow: 0 0 14px rgba(85,178,255,.8);
-    }
-
-    .mode-btn.active[data-mode="yelp"] .led {
-      background: #ffe45c;
-      box-shadow: 0 0 14px rgba(255,228,92,.75);
-    }
-
-    .mode-btn.active[data-mode="phaser"] .led {
-      background: #ff875b;
-      box-shadow: 0 0 14px rgba(255,135,91,.75);
-    }
-
-    .mode-btn.active[data-mode="priority"] .led {
-      background: #ff5c84;
-      box-shadow: 0 0 14px rgba(255,92,132,.78);
-    }
-
-    .controls {
-      margin-top: 18px;
+    .rotary-wrap {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-
-    .action-btn {
-      padding: 18px 14px;
-      min-height: 86px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-      letter-spacing: 1px;
-    }
-
-    .action-btn small {
-      display: block;
-      margin-top: 6px;
-      font-size: 11px;
-      font-weight: normal;
-      color: #9ba5af;
-      letter-spacing: 1px;
-    }
-
-    .action-btn.stop.active {
-      border-color: #8f989f;
-    }
-
-    .action-btn.manual.active {
-      border-color: #68ff9a;
-      box-shadow: 0 0 18px rgba(104,255,154,.18), inset 0 0 10px rgba(104,255,154,.08);
-    }
-
-    .horn-wrap {
-      margin-top: 18px;
-    }
-
-    .horn-btn {
-      width: 100%;
-      min-height: 116px;
-      padding: 16px;
-      border-color: #5f2323;
-      background:
-        linear-gradient(180deg, #592020 0%, #3a1616 45%, #1e0d0d 100%);
-      color: #fff1f1;
-      text-align: center;
-    }
-
-    .horn-btn .big {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: 2px;
-    }
-
-    .horn-btn .small {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #f3b5b5;
-      letter-spacing: 1.5px;
-    }
-
-    .horn-btn.active {
-      border-color: #ff5a5a;
-      box-shadow:
-        0 0 22px rgba(255,90,90,.3),
-        inset 0 0 22px rgba(255,90,90,.12);
-    }
-
-    .info-panel {
-      display: grid;
+      grid-template-columns: 100px 1fr 100px;
+      align-items: center;
       gap: 16px;
     }
 
-    .card {
-      background: linear-gradient(180deg, #13171b, #0d1013);
-      border: 1px solid #2b3138;
+    .rotary-btn {
+      height: 64px;
+      border-radius: 16px;
+      border: 1px solid #444d57;
+      background:
+        linear-gradient(180deg, #353d46, #15191e);
+      color: #f5f7fa;
+      font-size: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 8px 18px rgba(0,0,0,.35);
+    }
+
+    .rotary-btn:active,
+    .big-btn:active,
+    .toggle:active {
+      transform: translateY(1px);
+    }
+
+    .knob-zone {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .knob {
+      width: 250px;
+      height: 250px;
+      position: relative;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, #535c66 0%, #313841 30%, #171b20 60%, #0b0e11 100%);
+      border: 3px solid #4c5560;
+      box-shadow:
+        inset 0 12px 24px rgba(255,255,255,.05),
+        inset 0 -14px 26px rgba(0,0,0,.65),
+        0 18px 34px rgba(0,0,0,.45);
+      transition: transform .18s ease;
+    }
+
+    .knob::before {
+      content: "";
+      position: absolute;
+      inset: 32px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 30%, #39414a 0%, #1a1f25 48%, #0c0f12 100%);
+      border: 2px solid #58616c;
+      box-shadow: inset 0 0 20px rgba(0,0,0,.6);
+    }
+
+    .pointer {
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      width: 11px;
+      height: 62px;
+      border-radius: 9px;
+      background: linear-gradient(180deg, #ffffff, #a7b2bd);
+      box-shadow: 0 0 12px rgba(255,255,255,.25);
+    }
+
+    .knob-center-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    }
+
+    .knob-center-label .small {
+      display: block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: normal;
+      letter-spacing: 1px;
+    }
+
+    .ring-label {
+      position: absolute;
+      font-size: 12px;
+      font-weight: bold;
+      color: #c8d0d8;
+      text-shadow: 0 1px 2px rgba(0,0,0,.65);
+      letter-spacing: 1px;
+    }
+
+    .ring-label.active {
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255,255,255,.45);
+    }
+
+    .mode-strip {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .mode-indicator {
+      padding: 11px 8px;
+      border-radius: 12px;
+      background: #0c1013;
+      border: 1px solid #343c45;
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+    }
+
+    .mode-indicator.active {
+      color: white;
+      box-shadow: inset 0 0 16px rgba(255,255,255,.04), 0 0 12px rgba(255,255,255,.08);
+    }
+
+    .mode-indicator.radio.active { border-color: #71d9ff; color: #71d9ff; }
+    .mode-indicator.wail.active { border-color: #58b6ff; color: #58b6ff; }
+    .mode-indicator.yelp.active { border-color: #ffe067; color: #ffe067; }
+    .mode-indicator.phaser.active { border-color: #ff8857; color: #ff8857; }
+    .mode-indicator.priority.active { border-color: #ff5e96; color: #ff5e96; }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .big-btn {
+      min-height: 100px;
+      border-radius: 18px;
+      border: 1px solid #3f4852;
+      background:
+        linear-gradient(180deg, #333b44, #12171b);
+      color: #f4f8fb;
+      cursor: pointer;
+      padding: 14px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.05),
+        0 8px 18px rgba(0,0,0,.35);
+    }
+
+    .big-btn .big {
+      display: block;
+      font-size: 23px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .big-btn .small {
+      display: block;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    .big-btn.manual.active {
+      border-color: #75ffb0;
+      box-shadow: 0 0 20px rgba(117,255,176,.18), inset 0 0 14px rgba(117,255,176,.1);
+    }
+
+    .big-btn.horn {
+      border-color: #6b2626;
+      background: linear-gradient(180deg, #672323, #1d0c0c);
+    }
+
+    .big-btn.horn .small {
+      color: #f0b5b5;
+    }
+
+    .big-btn.horn.active {
+      border-color: #ff5e5e;
+      box-shadow: 0 0 22px rgba(255,94,94,.22), inset 0 0 14px rgba(255,94,94,.1);
+    }
+
+    .switch-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #0d1114;
+      border: 1px solid #343c45;
+    }
+
+    .toggle-info {
+      font-size: 13px;
+      color: #d9e1e8;
+      letter-spacing: 1px;
+    }
+
+    .toggle-info small {
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    .toggle {
+      width: 64px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #47515b;
+      background: linear-gradient(180deg, #313841, #13181d);
+      position: relative;
+      cursor: pointer;
+      box-shadow: inset 0 0 10px rgba(0,0,0,.5);
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #dbe2e8, #8f99a4);
+      box-shadow: 0 2px 6px rgba(0,0,0,.5);
+      transition: left .15s ease;
+    }
+
+    .toggle.on {
+      background: linear-gradient(180deg, #2f5f46, #13261c);
+      border-color: #4faf7b;
+    }
+
+    .toggle.on::after {
+      left: 32px;
+    }
+
+    .info-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        linear-gradient(180deg, #171c21, #0c1013);
+      border: 1px solid #333b44;
       border-radius: 18px;
       padding: 16px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      margin-bottom: 16px;
     }
 
-    .card h3 {
+    .info-card h3 {
       margin: 0 0 12px;
       font-size: 13px;
-      color: #9aa5af;
+      color: var(--text-dim);
       letter-spacing: 2px;
-    }
-
-    .key-list {
-      display: grid;
-      gap: 10px;
     }
 
     .key-row {
@@ -302,25 +518,18 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+      margin: 10px 0;
       font-size: 14px;
-      color: #dfe6ed;
     }
 
     .kbd {
-      min-width: 44px;
+      min-width: 48px;
       text-align: center;
       padding: 7px 10px;
       border-radius: 10px;
-      background: #0a0d10;
-      border: 1px solid #313841;
-      color: #f5f7fa;
+      background: #090c0f;
+      border: 1px solid #343c45;
       font-weight: bold;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-    }
-
-    .volume-wrap {
-      display: grid;
-      gap: 10px;
     }
 
     input[type="range"] {
@@ -328,147 +537,194 @@
       cursor: pointer;
     }
 
-    .footer-note {
+    .note {
       font-size: 12px;
-      color: #8f99a3;
-      line-height: 1.5;
+      color: var(--text-dim);
+      line-height: 1.55;
     }
 
-    @media (max-width: 820px) {
+    @media (max-width: 930px) {
       .main {
         grid-template-columns: 1fr;
       }
 
       .left {
         border-right: 0;
-        border-bottom: 1px solid #272c31;
+        border-bottom: 1px solid #2a3138;
       }
 
-      .mode-grid,
-      .controls {
+      .rotary-wrap {
+        grid-template-columns: 78px 1fr 78px;
+      }
+
+      .knob {
+        width: 210px;
+        height: 210px;
+      }
+
+      .control-grid,
+      .switch-row,
+      .mode-strip {
         grid-template-columns: 1fr;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .status-wrap {
-        justify-content: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <div class="console">
-    <div class="topbar">
-      <div class="brand">
-        <h1>WHELEN HS3200</h1>
-        <p>SIMULATED SIREN CONTROL HEAD</p>
-      </div>
+  <div id="lightbar" class="lightbar"></div>
 
-      <div class="status-wrap">
-        <div class="status-label">SYSTEM STATUS</div>
-        <div id="statusBox" class="status-box status-standby">STANDBY</div>
-      </div>
-    </div>
+  <div class="page">
+    <div class="console">
+      <div class="screw s1"></div>
+      <div class="screw s2"></div>
+      <div class="screw s3"></div>
+      <div class="screw s4"></div>
 
-    <div class="main">
-      <div class="left">
-        <h2 class="section-title">PRIMARY TONES</h2>
-
-        <div class="mode-grid">
-          <button class="mode-btn" data-mode="wail" onclick="setMode('wail')">
-            <div class="led"></div>
-            <div class="name">WAIL</div>
-            <div class="sub">LONG RISE / FALL</div>
-          </button>
-
-          <button class="mode-btn" data-mode="yelp" onclick="setMode('yelp')">
-            <div class="led"></div>
-            <div class="name">YELP</div>
-            <div class="sub">FAST SWEEP</div>
-          </button>
-
-          <button class="mode-btn" data-mode="phaser" onclick="setMode('phaser')">
-            <div class="led"></div>
-            <div class="name">PHASER</div>
-            <div class="sub">VERY FAST SWEEP</div>
-          </button>
-
-          <button class="mode-btn" data-mode="priority" onclick="setMode('priority')">
-            <div class="led"></div>
-            <div class="name">PRIORITY</div>
-            <div class="sub">SPECIAL ALERT</div>
-          </button>
+      <div class="topbar">
+        <div class="brand">
+          <h1>WHELEN HS3200</h1>
+          <p>V4 FULL METAL DASHBOARD</p>
         </div>
 
-        <div class="controls">
-          <button id="manualBtn" class="action-btn manual"
-            onmousedown="startManual()"
-            onmouseup="stopManual()"
-            onmouseleave="stopManual()"
-            ontouchstart="startManual(event)"
-            ontouchend="stopManual(event)">
-            MANUAL
-            <small>PRESS AND HOLD</small>
-          </button>
-
-          <button id="stopBtn" class="action-btn stop" onclick="stopAll(true)">
-            STOP
-            <small>ALL AUDIO OFF</small>
-          </button>
-        </div>
-
-        <div class="horn-wrap">
-          <button id="hornBtn" class="horn-btn"
-            onmousedown="startHorn()"
-            onmouseup="stopHorn()"
-            onmouseleave="stopHorn()"
-            ontouchstart="startHorn(event)"
-            ontouchend="stopHorn(event)">
-            <div class="big">AIRHORN</div>
-            <div class="small">PRESS AND HOLD</div>
-          </button>
+        <div class="status-cluster">
+          <div id="powerPilot" class="pilot"></div>
+          <div id="statusBox" class="status-box status-standby">STANDBY</div>
         </div>
       </div>
 
-      <div class="right">
-        <div class="info-panel">
-          <div class="card">
+      <div class="main">
+        <div class="left">
+          <h2 class="section-title">ROTARY SELECTOR</h2>
+
+          <div class="metal-card">
+            <div class="rotary-wrap">
+              <button class="rotary-btn" onclick="rotateLeft()">−</button>
+
+              <div class="knob-zone">
+                <div id="knob" class="knob">
+                  <div id="label-radio" class="ring-label" style="left:50%; top:-4px; transform:translateX(-50%);">RADIO</div>
+                  <div id="label-wail" class="ring-label" style="right:18px; top:38px;">WAIL</div>
+                  <div id="label-yelp" class="ring-label" style="right:6px; bottom:72px;">YELP</div>
+                  <div id="label-phaser" class="ring-label" style="left:6px; bottom:72px;">PHASER</div>
+                  <div id="label-priority" class="ring-label" style="left:14px; top:38px;">PRIORITY</div>
+
+                  <div class="pointer"></div>
+
+                  <div class="knob-center-label">
+                    <span id="knobModeText">RADIO</span>
+                    <span class="small">ROTARY SELECTOR</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="rotary-btn" onclick="rotateRight()">+</button>
+            </div>
+
+            <div class="mode-strip">
+              <div id="indicator-radio" class="mode-indicator radio">RADIO</div>
+              <div id="indicator-wail" class="mode-indicator wail">WAIL</div>
+              <div id="indicator-yelp" class="mode-indicator yelp">YELP</div>
+              <div id="indicator-phaser" class="mode-indicator phaser">PHASER</div>
+              <div id="indicator-priority" class="mode-indicator priority">PRIORITY</div>
+            </div>
+          </div>
+
+          <h2 class="section-title">PRIMARY CONTROLS</h2>
+
+          <div class="metal-card">
+            <div class="control-grid">
+              <button id="manualBtn" class="big-btn manual"
+                onmousedown="startManual()"
+                onmouseup="stopManual()"
+                onmouseleave="stopManual()"
+                ontouchstart="startManual(event)"
+                ontouchend="stopManual(event)">
+                <span class="big">MANUAL</span>
+                <span class="small">PRESS AND HOLD</span>
+              </button>
+
+              <button id="hornBtn" class="big-btn horn"
+                onmousedown="startHorn()"
+                onmouseup="stopHorn()"
+                onmouseleave="stopHorn()"
+                ontouchstart="startHorn(event)"
+                ontouchend="stopHorn(event)">
+                <span class="big">AIRHORN</span>
+                <span class="small">PRESS AND HOLD</span>
+              </button>
+
+              <button class="big-btn" onclick="stopAll(true)">
+                <span class="big">STOP</span>
+                <span class="small">ALL AUDIO OFF</span>
+              </button>
+            </div>
+          </div>
+
+          <h2 class="section-title">TOGGLE SWITCHES</h2>
+
+          <div class="metal-card">
+            <div class="switch-row">
+              <div class="toggle-wrap">
+                <div class="toggle-info">
+                  LIGHTBAR
+                  <small>RED / BLUE FLASH</small>
+                </div>
+                <button id="lightbarToggle" class="toggle on" onclick="toggleLightbar()"></button>
+              </div>
+
+              <div class="toggle-wrap">
+                <div class="toggle-info">
+                  AUTO STARTUP
+                  <small>BOOT SOUND ON LOAD</small>
+                </div>
+                <button id="startupToggle" class="toggle on" onclick="toggleStartup()"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="info-card">
             <h3>KEYBOARD</h3>
-            <div class="key-list">
-              <div class="key-row"><span>WAIL</span><span class="kbd">1</span></div>
-              <div class="key-row"><span>YELP</span><span class="kbd">2</span></div>
-              <div class="key-row"><span>PHASER</span><span class="kbd">3</span></div>
-              <div class="key-row"><span>PRIORITY</span><span class="kbd">4</span></div>
-              <div class="key-row"><span>STOP</span><span class="kbd">0</span></div>
-              <div class="key-row"><span>MANUAL</span><span class="kbd">M</span></div>
-              <div class="key-row"><span>AIRHORN</span><span class="kbd">Space</span></div>
-            </div>
+            <div class="key-row"><span>Rotate Left</span><span class="kbd">←</span></div>
+            <div class="key-row"><span>Rotate Right</span><span class="kbd">→</span></div>
+            <div class="key-row"><span>Radio / Wail / Yelp / Phaser / Priority</span><span class="kbd">1-5</span></div>
+            <div class="key-row"><span>Manual</span><span class="kbd">M</span></div>
+            <div class="key-row"><span>Airhorn</span><span class="kbd">Space</span></div>
+            <div class="key-row"><span>Stop</span><span class="kbd">0</span></div>
           </div>
 
-          <div class="card">
+          <div class="info-card">
             <h3>MASTER VOLUME</h3>
-            <div class="volume-wrap">
-              <input id="masterVolume" type="range" min="0" max="100" value="100" />
+            <input id="masterVolume" type="range" min="0" max="100" value="100">
+          </div>
+
+          <div class="info-card">
+            <h3>SOUND FILES</h3>
+            <div class="note">
+              Put these inside your <strong>sounds</strong> folder:
+              <br><br>
+              <strong>startup.mp3</strong><br>
+              <strong>radio.mp3</strong><br>
+              <strong>wail.mp3</strong><br>
+              <strong>yelp.mp3</strong><br>
+              <strong>phaser.mp3</strong><br>
+              <strong>priority.mp3</strong><br>
+              <strong>manual.mp3</strong><br>
+              <strong>airhorn.mp3</strong>
             </div>
           </div>
 
-          <div class="card">
-            <h3>SETUP</h3>
-            <div class="footer-note">
-              Put your sound files inside:
+          <div class="info-card">
+            <h3>NOTES</h3>
+            <div class="note">
+              Best result:
               <br><br>
-              <strong>sounds/wail.mp3</strong><br>
-              <strong>sounds/yelp.mp3</strong><br>
-              <strong>sounds/phaser.mp3</strong><br>
-              <strong>sounds/priority.mp3</strong><br>
-              <strong>sounds/manual.mp3</strong><br>
-              <strong>sounds/airhorn.mp3</strong>
-              <br><br>
-              For the best result, use clean loopable siren audio and a long airhorn sample.
+              - use loopable siren audio
+              <br>
+              - use a long airhorn sample
+              <br>
+              - use a short boot chirp for startup.mp3
             </div>
           </div>
         </div>
@@ -476,63 +732,140 @@
     </div>
   </div>
 
-  <!-- Primary tones -->
+  <audio id="startup" src="sounds/startup.mp3" preload="auto"></audio>
+  <audio id="radio" src="sounds/radio.mp3" loop preload="auto"></audio>
   <audio id="wail" src="sounds/wail.mp3" loop preload="auto"></audio>
   <audio id="yelp" src="sounds/yelp.mp3" loop preload="auto"></audio>
   <audio id="phaser" src="sounds/phaser.mp3" loop preload="auto"></audio>
   <audio id="priority" src="sounds/priority.mp3" loop preload="auto"></audio>
-
-  <!-- Hold functions -->
   <audio id="manual" src="sounds/manual.mp3" loop preload="auto"></audio>
   <audio id="airhorn" src="sounds/airhorn.mp3" loop preload="auto"></audio>
 
   <script>
-    const sirenIds = ["wail", "yelp", "phaser", "priority"];
-    const sirens = {};
-    sirenIds.forEach(id => sirens[id] = document.getElementById(id));
+    const modes = ["radio", "wail", "yelp", "phaser", "priority"];
+    const angles = {
+      radio: 0,
+      wail: 72,
+      yelp: 144,
+      phaser: 216,
+      priority: 288
+    };
 
+    const players = {
+      radio: document.getElementById("radio"),
+      wail: document.getElementById("wail"),
+      yelp: document.getElementById("yelp"),
+      phaser: document.getElementById("phaser"),
+      priority: document.getElementById("priority")
+    };
+
+    const startup = document.getElementById("startup");
     const manual = document.getElementById("manual");
     const airhorn = document.getElementById("airhorn");
 
+    const knob = document.getElementById("knob");
+    const knobModeText = document.getElementById("knobModeText");
     const statusBox = document.getElementById("statusBox");
-    const hornBtn = document.getElementById("hornBtn");
-    const manualBtn = document.getElementById("manualBtn");
-    const stopBtn = document.getElementById("stopBtn");
+    const powerPilot = document.getElementById("powerPilot");
     const volumeSlider = document.getElementById("masterVolume");
-    const modeButtons = document.querySelectorAll(".mode-btn");
+    const manualBtn = document.getElementById("manualBtn");
+    const hornBtn = document.getElementById("hornBtn");
+    const lightbarEl = document.getElementById("lightbar");
+    const lightbarToggleBtn = document.getElementById("lightbarToggle");
+    const startupToggleBtn = document.getElementById("startupToggle");
 
-    let currentMode = null;
+    let currentIndex = 0;
+    let currentMode = modes[currentIndex];
+    let masterVolume = 1;
     let hornActive = false;
     let manualActive = false;
-    let masterVolume = 1.0;
     let hornKeyDown = false;
     let manualKeyDown = false;
+    let lightbarEnabled = true;
+    let startupEnabled = true;
 
     function applyVolumes() {
-      sirenIds.forEach(id => {
-        sirens[id].volume = masterVolume * (hornActive ? 0.35 : 1.0);
-      });
+      for (const mode of modes) {
+        players[mode].volume = masterVolume * (hornActive ? 0.35 : 1.0);
+      }
+      manual.volume = masterVolume;
+      airhorn.volume = masterVolume;
+      startup.volume = Math.min(masterVolume, 0.9);
+    }
 
-      manual.volume = masterVolume * 1.0;
-      airhorn.volume = masterVolume * 1.0;
+    function updatePowerPilot() {
+      const active = currentMode !== null || manualActive || hornActive;
+      powerPilot.classList.toggle("on", active);
+    }
+
+    function updateLightbar() {
+      const shouldFlash = lightbarEnabled && (currentMode !== "radio" || hornActive || manualActive);
+      lightbarEl.classList.toggle("active", shouldFlash);
+      lightbarToggleBtn.classList.toggle("on", lightbarEnabled);
     }
 
     function setStatus(text, cls) {
       statusBox.className = "status-box " + cls;
       statusBox.textContent = text;
-    }
-
-    function updateModeLights() {
-      modeButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.mode === currentMode);
-      });
+      updatePowerPilot();
+      updateLightbar();
     }
 
     function stopPrimary() {
-      sirenIds.forEach(id => {
-        sirens[id].pause();
-        sirens[id].currentTime = 0;
+      for (const mode of modes) {
+        players[mode].pause();
+        players[mode].currentTime = 0;
+      }
+    }
+
+    function playCurrentMode() {
+      stopPrimary();
+      if (currentMode && players[currentMode]) {
+        players[currentMode].currentTime = 0;
+        players[currentMode].play().catch(() => {});
+      }
+    }
+
+    function refreshIndicators() {
+      modes.forEach(mode => {
+        document.getElementById("indicator-" + mode).classList.toggle("active", mode === currentMode);
+        document.getElementById("label-" + mode).classList.toggle("active", mode === currentMode);
       });
+    }
+
+    function refreshKnob() {
+      knob.style.transform = `rotate(${angles[currentMode]}deg)`;
+      knobModeText.textContent = currentMode.toUpperCase();
+      refreshIndicators();
+    }
+
+    function refreshStatus() {
+      if (hornActive) return setStatus("AIRHORN", "status-airhorn");
+      if (manualActive) return setStatus("MANUAL", "status-manual");
+
+      if (currentMode === "radio") return setStatus("RADIO", "status-radio");
+      if (currentMode === "wail") return setStatus("WAIL", "status-wail");
+      if (currentMode === "yelp") return setStatus("YELP", "status-yelp");
+      if (currentMode === "phaser") return setStatus("PHASER", "status-phaser");
+      if (currentMode === "priority") return setStatus("PRIORITY", "status-priority");
+
+      return setStatus("STANDBY", "status-standby");
+    }
+
+    function setModeByIndex(index) {
+      currentIndex = (index + modes.length) % modes.length;
+      currentMode = modes[currentIndex];
+      refreshKnob();
+      playCurrentMode();
+      refreshStatus();
+    }
+
+    function rotateLeft() {
+      setModeByIndex(currentIndex - 1);
+    }
+
+    function rotateRight() {
+      setModeByIndex(currentIndex + 1);
     }
 
     function stopManualInternal() {
@@ -550,78 +883,11 @@
       applyVolumes();
     }
 
-    function refreshStatus() {
-      if (hornActive) {
-        setStatus("AIRHORN", "status-airhorn");
-        return;
-      }
-
-      if (manualActive) {
-        setStatus("MANUAL", "status-manual");
-        return;
-      }
-
-      if (currentMode === "wail") setStatus("WAIL", "status-wail");
-      else if (currentMode === "yelp") setStatus("YELP", "status-yelp");
-      else if (currentMode === "phaser") setStatus("PHASER", "status-phaser");
-      else if (currentMode === "priority") setStatus("PRIORITY", "status-priority");
-      else setStatus("STANDBY", "status-standby");
-    }
-
-    function stopAll(fromButton = false) {
-      stopPrimary();
-      stopManualInternal();
-      stopHornInternal();
-      currentMode = null;
-      updateModeLights();
-      refreshStatus();
-
-      if (fromButton) {
-        stopBtn.classList.add("active");
-        setTimeout(() => stopBtn.classList.remove("active"), 120);
-      }
-    }
-
-    function setMode(mode) {
-      stopPrimary();
-      stopManualInternal();
-
-      currentMode = mode;
-      updateModeLights();
-      applyVolumes();
-
-      const selected = sirens[mode];
-      selected.currentTime = 0;
-      selected.play().catch(() => {});
-      refreshStatus();
-    }
-
-    function startHorn(event) {
-      if (event) event.preventDefault();
-      if (hornActive) return;
-
-      hornActive = true;
-      hornBtn.classList.add("active");
-      applyVolumes();
-
-      airhorn.currentTime = 0;
-      airhorn.play().catch(() => {});
-      refreshStatus();
-    }
-
-    function stopHorn(event) {
-      if (event) event.preventDefault();
-      stopHornInternal();
-      refreshStatus();
-    }
-
     function startManual(event) {
       if (event) event.preventDefault();
       if (manualActive) return;
-
       manualActive = true;
       manualBtn.classList.add("active");
-
       manual.currentTime = 0;
       manual.play().catch(() => {});
       refreshStatus();
@@ -633,6 +899,41 @@
       refreshStatus();
     }
 
+    function startHorn(event) {
+      if (event) event.preventDefault();
+      if (hornActive) return;
+      hornActive = true;
+      hornBtn.classList.add("active");
+      applyVolumes();
+      airhorn.currentTime = 0;
+      airhorn.play().catch(() => {});
+      refreshStatus();
+    }
+
+    function stopHorn(event) {
+      if (event) event.preventDefault();
+      stopHornInternal();
+      refreshStatus();
+    }
+
+    function stopAll() {
+      stopPrimary();
+      stopManualInternal();
+      stopHornInternal();
+      refreshStatus();
+    }
+
+    function toggleLightbar() {
+      lightbarEnabled = !lightbarEnabled;
+      lightbarToggleBtn.classList.toggle("on", lightbarEnabled);
+      updateLightbar();
+    }
+
+    function toggleStartup() {
+      startupEnabled = !startupEnabled;
+      startupToggleBtn.classList.toggle("on", startupEnabled);
+    }
+
     volumeSlider.addEventListener("input", () => {
       masterVolume = Number(volumeSlider.value) / 100;
       applyVolumes();
@@ -641,11 +942,22 @@
     document.addEventListener("keydown", (e) => {
       const key = e.key.toLowerCase();
 
-      if (key === "1") setMode("wail");
-      if (key === "2") setMode("yelp");
-      if (key === "3") setMode("phaser");
-      if (key === "4") setMode("priority");
-      if (key === "0") stopAll(true);
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        rotateLeft();
+      }
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        rotateRight();
+      }
+
+      if (key === "1") setModeByIndex(0);
+      if (key === "2") setModeByIndex(1);
+      if (key === "3") setModeByIndex(2);
+      if (key === "4") setModeByIndex(3);
+      if (key === "5") setModeByIndex(4);
+      if (key === "0") stopAll();
 
       if (key === "m" && !manualKeyDown) {
         manualKeyDown = true;
@@ -677,12 +989,24 @@
     window.addEventListener("blur", () => {
       hornKeyDown = false;
       manualKeyDown = false;
-      stopHorn();
       stopManual();
+      stopHorn();
     });
 
+    document.addEventListener("click", function firstInteraction() {
+      if (startupEnabled) {
+        startup.currentTime = 0;
+        startup.play().catch(() => {});
+      }
+      document.removeEventListener("click", firstInteraction);
+    }, { once: true });
+
     applyVolumes();
+    refreshKnob();
+    playCurrentMode();
     refreshStatus();
+    lightbarToggleBtn.classList.add("on");
+    startupToggleBtn.classList.add("on");
   </script>
 </body>
 </html>
