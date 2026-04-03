@@ -139,6 +139,8 @@
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       flex: 1;
+      overflow-y: auto;
+      padding-bottom: 4px;
     }
 
     .btn {
@@ -155,6 +157,7 @@
         0 10px 20px rgba(0,0,0,0.22);
       transition: transform 0.08s ease, box-shadow 0.12s ease, border-color 0.12s ease;
       touch-action: manipulation;
+      min-height: 88px;
     }
 
     .btn:active {
@@ -261,18 +264,68 @@
         <span class="small">LOOP</span>
       </button>
 
-      <button class="btn manual" id="btn-manual"
-        ontouchstart="startManual(event)"
+      <button class="btn manual" id="btn-manual1"
+        ontouchstart="startManual(1,event)"
         ontouchend="stopManual(event)"
-        ontouchcancel="stopManual(event)">
-        MANUAL
+        ontouchcancel="stopManual(event)"
+        onmousedown="startManual(1,event)"
+        onmouseup="stopManual(event)"
+        onmouseleave="stopManual(event)">
+        MANUAL 1
+        <span class="small">HOLD</span>
+      </button>
+
+      <button class="btn manual" id="btn-manual2"
+        ontouchstart="startManual(2,event)"
+        ontouchend="stopManual(event)"
+        ontouchcancel="stopManual(event)"
+        onmousedown="startManual(2,event)"
+        onmouseup="stopManual(event)"
+        onmouseleave="stopManual(event)">
+        MANUAL 2
+        <span class="small">HOLD</span>
+      </button>
+
+      <button class="btn manual" id="btn-manual3"
+        ontouchstart="startManual(3,event)"
+        ontouchend="stopManual(event)"
+        ontouchcancel="stopManual(event)"
+        onmousedown="startManual(3,event)"
+        onmouseup="stopManual(event)"
+        onmouseleave="stopManual(event)">
+        MANUAL 3
+        <span class="small">HOLD</span>
+      </button>
+
+      <button class="btn manual" id="btn-manual4"
+        ontouchstart="startManual(4,event)"
+        ontouchend="stopManual(event)"
+        ontouchcancel="stopManual(event)"
+        onmousedown="startManual(4,event)"
+        onmouseup="stopManual(event)"
+        onmouseleave="stopManual(event)">
+        MANUAL 4
+        <span class="small">HOLD</span>
+      </button>
+
+      <button class="btn manual" id="btn-manual5"
+        ontouchstart="startManual(5,event)"
+        ontouchend="stopManual(event)"
+        ontouchcancel="stopManual(event)"
+        onmousedown="startManual(5,event)"
+        onmouseup="stopManual(event)"
+        onmouseleave="stopManual(event)">
+        MANUAL 5
         <span class="small">HOLD</span>
       </button>
 
       <button class="btn horn" id="btn-horn"
         ontouchstart="startHorn(event)"
         ontouchend="stopHorn(event)"
-        ontouchcancel="stopHorn(event)">
+        ontouchcancel="stopHorn(event)"
+        onmousedown="startHorn(event)"
+        onmouseup="stopHorn(event)"
+        onmouseleave="stopHorn(event)">
         HORN
         <span class="small">HOLD</span>
       </button>
@@ -286,16 +339,25 @@
   <audio id="wail" src="sounds/wail.mp3" loop></audio>
   <audio id="yelp" src="sounds/yelp.mp3" loop></audio>
   <audio id="t3" src="sounds/t3.mp3" loop></audio>
-  <audio id="manual" src="sounds/manual.mp3" loop></audio>
+
+  <audio id="manual1" src="sounds/manual1.mp3" loop></audio>
+  <audio id="manual2" src="sounds/manual2.mp3" loop></audio>
+  <audio id="manual3" src="sounds/manual3.mp3" loop></audio>
+  <audio id="manual4" src="sounds/manual4.mp3" loop></audio>
+  <audio id="manual5" src="sounds/manual5.mp3" loop></audio>
+
   <audio id="horn" src="sounds/horn.mp3" loop></audio>
 
   <script>
     const modeIds = ["wail", "yelp", "t3"];
+    const manualIds = ["manual1", "manual2", "manual3", "manual4", "manual5"];
     const flash = document.getElementById("flash");
     const modeText = document.getElementById("modeText");
     const statusPill = document.getElementById("statusPill");
 
     let currentMode = null;
+    let currentManual = null;
+    let hornActive = false;
 
     function setText(text) {
       modeText.textContent = text;
@@ -318,16 +380,54 @@
       });
     }
 
-    function stopAll() {
-      stopModesOnly();
+    function stopManualsOnly() {
+      manualIds.forEach(id => {
+        const a = document.getElementById(id);
+        a.pause();
+        a.currentTime = 0;
+      });
+      currentManual = null;
+    }
 
-      const manual = document.getElementById("manual");
+    function stopHornOnly() {
       const horn = document.getElementById("horn");
-
-      manual.pause();
-      manual.currentTime = 0;
       horn.pause();
       horn.currentTime = 0;
+      hornActive = false;
+    }
+
+    function restoreState() {
+      clearButtons();
+
+      if (hornActive) {
+        document.getElementById("btn-horn").classList.add("active");
+        setLights(true);
+        setText("HORN");
+        return;
+      }
+
+      if (currentManual !== null) {
+        document.getElementById("btn-manual" + currentManual).classList.add("active");
+        setLights(true);
+        setText("MANUAL " + currentManual);
+        return;
+      }
+
+      if (currentMode) {
+        document.getElementById("btn-" + currentMode).classList.add("active");
+        setLights(true);
+        setText(currentMode.toUpperCase());
+        return;
+      }
+
+      setLights(false);
+      setText("STANDBY");
+    }
+
+    function stopAll() {
+      stopModesOnly();
+      stopManualsOnly();
+      stopHornOnly();
 
       currentMode = null;
       clearButtons();
@@ -336,46 +436,59 @@
     }
 
     function playMode(id) {
-      stopAll();
+      stopModesOnly();
+      stopManualsOnly();
+      stopHornOnly();
+
       currentMode = id;
       document.getElementById(id).play();
+      clearButtons();
       document.getElementById("btn-" + id).classList.add("active");
       setLights(true);
       setText(id.toUpperCase());
     }
 
-    function startManual(e) {
-      e.preventDefault();
-      const audio = document.getElementById("manual");
+    function startManual(num, e) {
+      if (e) e.preventDefault();
+
+      stopManualsOnly();
+      stopHornOnly();
+      stopModesOnly();
+
+      currentManual = num;
+      const audio = document.getElementById("manual" + num);
+
       clearButtons();
-      document.getElementById("btn-manual").classList.add("active");
+      document.getElementById("btn-manual" + num).classList.add("active");
       audio.currentTime = 0;
       audio.play();
       setLights(true);
-      setText("MANUAL");
+      setText("MANUAL " + num);
     }
 
     function stopManual(e) {
       if (e) e.preventDefault();
-      const audio = document.getElementById("manual");
-      audio.pause();
-      audio.currentTime = 0;
 
-      clearButtons();
-
-      if (currentMode) {
-        document.getElementById("btn-" + currentMode).classList.add("active");
-        setLights(true);
-        setText(currentMode.toUpperCase());
-      } else {
-        setLights(false);
-        setText("STANDBY");
+      if (currentManual !== null) {
+        const audio = document.getElementById("manual" + currentManual);
+        audio.pause();
+        audio.currentTime = 0;
+        currentManual = null;
       }
+
+      restoreState();
     }
 
     function startHorn(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
+
+      stopHornOnly();
+      stopManualsOnly();
+      stopModesOnly();
+
       const audio = document.getElementById("horn");
+      hornActive = true;
+
       clearButtons();
       document.getElementById("btn-horn").classList.add("active");
       audio.currentTime = 0;
@@ -386,20 +499,9 @@
 
     function stopHorn(e) {
       if (e) e.preventDefault();
-      const audio = document.getElementById("horn");
-      audio.pause();
-      audio.currentTime = 0;
 
-      clearButtons();
-
-      if (currentMode) {
-        document.getElementById("btn-" + currentMode).classList.add("active");
-        setLights(true);
-        setText(currentMode.toUpperCase());
-      } else {
-        setLights(false);
-        setText("STANDBY");
-      }
+      stopHornOnly();
+      restoreState();
     }
   </script>
 </body>
